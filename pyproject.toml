@@ -35,3 +35,6 @@ Repository = "https://github.com/aperez/bytecraw"
 
 [tool.setuptools]
 packages = ["bytecraw"]
+
+[tool.vercel]
+entrypoint = "demo.app:app"
