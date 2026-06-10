@@ -9,7 +9,7 @@ description = "Una sola API para scrapear cualquier sitio: HTML estatico, JS din
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "aperez", email = "aperez@adokmx.com" }]
+authors = [{ name = "abrahamperz", email = "aperez@adokmx.com" }]
 keywords = ["scraping", "crawler", "beautifulsoup", "playwright", "markdown", "llm"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,10 +22,6 @@ dependencies = [
     "requests>=2.28",
     "beautifulsoup4>=4.11",
     "lxml>=4.9",
-    # Demo web (Flask) + Markdown para LLMs. Vercel instala desde aqui.
-    "flask>=3.0",
-    "markdownify>=0.11",
-    "trafilatura>=1.6",
 ]
 
 [project.optional-dependencies]
@@ -34,8 +30,8 @@ llm = ["markdownify>=0.11", "trafilatura>=1.6"]
 all = ["playwright>=1.40", "markdownify>=0.11", "trafilatura>=1.6"]
 
 [project.urls]
-Homepage = "https://github.com/aperez/bytecraw"
-Repository = "https://github.com/aperez/bytecraw"
+Homepage = "https://github.com/abrahamperz/ByteCraw"
+Repository = "https://github.com/abrahamperz/ByteCraw"
 
 [tool.setuptools]
 packages = ["bytecraw"]
