@@ -1,0 +1,6 @@
+flask
+requests
+beautifulsoup4
+lxml
+markdownify
+trafilatura
