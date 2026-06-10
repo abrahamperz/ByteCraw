@@ -1,25 +1,10 @@
-# Técnica 1: HTML estático
+# Deploy slim: solo lo que corre en serverless (Vercel) y en el demo web.
+# Para el set completo con navegador y crawler:  pip install -e ".[all]"
+#   (agrega playwright, scrapy, pandas para correr todos los ejemplos en local)
+
+flask
 requests
 beautifulsoup4
 lxml
-
-# Técnica 2: JS dinámico
-playwright
-
-# Técnica 4: scraping a escala
-scrapy
-
-# Técnica 5: APIs con sesión (usa requests, ya incluido)
-
-# CAPTCHA: resolución vía servicio externo (opcional)
-# 2captcha-python
-
-# Extra: HTML -> Markdown para ahorrar tokens en LLMs
 markdownify
 trafilatura
-
-# Utilidad para guardar resultados
-pandas
-
-# Frontend para visualizar resultados
-flask
