@@ -3,6 +3,19 @@
 5 técnicas de scraping + manejo de CAPTCHAs + truco de tokens, sobre sitios
 de práctica legales (`toscrape.com`).
 
+## Instalar desde PyPI
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install bytecraw         # trae todo: estático, APIs, Markdown y navegador
+python3 -m playwright install chromium  # solo si usas .browser()
+```
+
+`bytecraw` ya incluye todas las dependencias (requests, beautifulsoup4, lxml,
+markdownify, trafilatura y playwright). El único paso extra es descargar el
+navegador con `playwright install chromium`, y solo si vas a usar `.browser()`.
+
 ## La librería `bytecraw/`
 
 Las 5 técnicas envueltas en una sola API limpia (estilo SDK).

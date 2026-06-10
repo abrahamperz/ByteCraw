@@ -175,7 +175,7 @@
       <a class="btn btn-ghost" href="/try">Try it live</a>
     </div>
     <div class="install">
-      <span id="install-cmd"><span class="pmt">$</span> pip install bytecraw</span>
+      <span id="install-cmd"><span class="pmt">$</span> python3 -m pip install bytecraw</span>
       <span class="copy">copy</span>
     </div>
 
@@ -299,7 +299,8 @@ md = page.<span class="f">markdown</span>()</code></pre>
       <a class="btn btn-primary" href="/methods">Open methods</a>
       <a class="btn btn-ghost" href="#">Read the docs</a>
     </div>
-    <div class="install" style="margin-top:18px"><span><span class="pmt">$</span> pip install bytecraw</span><span class="copy">copy</span></div>
+    <div class="install" style="margin-top:18px"><span><span class="pmt">$</span> python3 -m pip install bytecraw</span><span class="copy">copy</span></div>
+    <div class="install" style="margin-top:10px"><span><span class="pmt">$</span> python3 -m playwright install chromium</span><span class="copy">copy</span></div>
   </div>
 </div>
 
@@ -309,7 +310,7 @@ md = page.<span class="f">markdown</span>()</code></pre>
 
 <script>
   const cmds = {
-    humans: '<span class="pmt">$</span> pip install bytecraw',
+    humans: '<span class="pmt">$</span> python3 -m pip install bytecraw',
     agents: '<span class="pmt">&gt;&gt;&gt;</span> Scraper().fetch(url).markdown()',
   };
   const cmd = document.getElementById('install-cmd');
