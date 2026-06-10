@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bytecraw"
+version = "0.1.0"
+description = "Una sola API para scrapear cualquier sitio: HTML estatico, JS dinamico, APIs, login con sesion, crawling y Markdown para LLMs."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "aperez", email = "aperez@adokmx.com" }]
+keywords = ["scraping", "crawler", "beautifulsoup", "playwright", "markdown", "llm"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "requests>=2.28",
+    "beautifulsoup4>=4.11",
+    "lxml>=4.9",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.40"]
+llm = ["markdownify>=0.11", "trafilatura>=1.6"]
+all = ["playwright>=1.40", "markdownify>=0.11", "trafilatura>=1.6"]
+
+[project.urls]
+Homepage = "https://github.com/aperez/bytecraw"
+Repository = "https://github.com/aperez/bytecraw"
+
+[tool.setuptools]
+packages = ["bytecraw"]

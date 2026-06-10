@@ -1,0 +1,16 @@
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="#000000"/>
+  <g stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none">
+    <!-- patas izquierdas -->
+    <path d="M14 13 L6 8"/>
+    <path d="M14 16 L5 15"/>
+    <path d="M14 19 L6 23"/>
+    <!-- patas derechas -->
+    <path d="M18 13 L26 8"/>
+    <path d="M18 16 L27 15"/>
+    <path d="M18 19 L26 23"/>
+  </g>
+  <!-- cuerpo -->
+  <circle cx="16" cy="13" r="3" fill="#ffffff"/>
+  <circle cx="16" cy="19" r="4.5" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Build artifacts
+build/
+dist/
+
+# Generated scraping outputs (from demo/examples)
+examples/*.csv
+examples/*.json
+examples/*.md
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+.gstack/
+.claude/
+
+# Generated output at root
+/pagina.md
