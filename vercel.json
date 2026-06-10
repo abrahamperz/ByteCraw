@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "demo/app.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["demo/templates/**", "demo/static/**", "bytecraw/**"]
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "demo/app.py" }
+  ]
+}
