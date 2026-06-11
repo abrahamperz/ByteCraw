@@ -5,14 +5,19 @@ Ejecuta cada script bajo demanda y muestra los resultados en tablas/gráficos.
 Correr:  python app.py   ->  abre http://127.0.0.1:5000
 """
 
+import atexit
 import csv
 import json
+import os
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request
+from dotenv import load_dotenv
+from flask import Flask, jsonify, render_template, request, session
+from posthog import Posthog
 
 BASE = Path(__file__).parent
 EXAMPLES = BASE.parent / "examples"
@@ -20,7 +25,32 @@ EXAMPLES = BASE.parent / "examples"
 sys.path.insert(0, str(BASE.parent))
 from bytecraw import Scraper
 
+load_dotenv()
+
+posthog_client = Posthog(
+    project_api_key=os.environ.get("POSTHOG_PROJECT_TOKEN", ""),
+    host=os.environ.get("POSTHOG_HOST", "https://us.i.posthog.com"),
+    enable_exception_autocapture=True,
+)
+atexit.register(posthog_client.shutdown)
+
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "bytecraw-dev-secret")
+
+
+def _get_distinct_id() -> str:
+    if "distinct_id" not in session:
+        session["distinct_id"] = str(uuid.uuid4())
+    return session["distinct_id"]
+
+
+@app.after_request
+def _flush_posthog(response):
+    # En serverless (Vercel) la función se congela tras responder y el envío
+    # en segundo plano de posthog-python puede perderse: forzamos el flush.
+    posthog_client.flush()
+    return response
+
 
 # Definición de cada técnica: script que ejecuta y archivo de salida que genera.
 TECNICAS = {
@@ -230,6 +260,18 @@ def analyze():
     except Exception:
         pass
 
+    posthog_client.capture(
+        _get_distinct_id(),
+        "url_analyzed",
+        properties={
+            "method_used": page.method,
+            "used_browser": uso_navegador,
+            "chromium_missing": falta_chromium,
+            "steps_count": len(pasos),
+            "has_markdown": bool(md),
+            "token_reduction_ratio": round(tok_md / page.tokens(), 2) if tok_md else None,
+        },
+    )
     return jsonify({
         "ok": True,
         "url": url,
@@ -269,6 +311,17 @@ def run(clave):
     segundos = round(time.perf_counter() - inicio, 2)
 
     data = leer_salida(t["salida"])
+    posthog_client.capture(
+        _get_distinct_id(),
+        "scrape_technique_run",
+        properties={
+            "technique": clave,
+            "technique_title": t["titulo"],
+            "success": proc.returncode == 0,
+            "duration_seconds": segundos,
+            "record_count": len(data) if isinstance(data, list) else None,
+        },
+    )
     return jsonify(
         {
             "ok": proc.returncode == 0,
@@ -286,7 +339,17 @@ def data(clave):
     """Devuelve resultados ya generados sin re-ejecutar el script."""
     if clave not in TECNICAS:
         return jsonify({"ok": False}), 404
-    return jsonify({"ok": True, "data": leer_salida(TECNICAS[clave]["salida"])})
+    data = leer_salida(TECNICAS[clave]["salida"])
+    posthog_client.capture(
+        _get_distinct_id(),
+        "scrape_data_retrieved",
+        properties={
+            "technique": clave,
+            "has_data": data is not None,
+            "record_count": len(data) if isinstance(data, list) else None,
+        },
+    )
+    return jsonify({"ok": True, "data": data})
 
 
 if __name__ == "__main__":
