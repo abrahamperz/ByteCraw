@@ -94,7 +94,12 @@
     color: var(--muted-2);
   }
   .install .pmt { color: var(--accent); }
-  .install .copy { color: var(--muted); font-size: 12px; border-left: 1px solid var(--border); padding-left: 12px; }
+  .install .copy { color: var(--muted); font-size: 12px; border-left: 1px solid var(--border); padding-left: 12px; cursor: pointer; user-select: none; transition: color .15s; }
+  .install .copy:hover { color: var(--text); }
+  .install .copy.done { color: var(--accent); font-weight: 600; }
+  .nextstep { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: var(--muted); opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .25s; }
+  .nextstep.show { opacity: 1; transform: none; }
+  .nextstep code { font-family: var(--mono); font-size: 13px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 7px; padding: 6px 12px; color: var(--code); }
 
   /* DEMO SPLIT */
   .demo { display: grid; grid-template-columns: 1fr 1.2fr; gap: 0; margin: 60px 0; text-align: left;
@@ -182,6 +187,10 @@
     <div class="install">
       <span id="install-cmd"><span class="pmt">$</span> python3 -m pip install bytecraw</span>
       <span class="copy" data-i18n="copy">copy</span>
+    </div>
+    <div id="next-step" class="nextstep">
+      <span data-i18n="ns_label">Now, in your code:</span>
+      <code>from bytecraw import Scraper</code>
     </div>
 
     <div class="demo">
@@ -325,6 +334,37 @@ md = page.<span class="f">markdown</span>()</code></pre>
       document.querySelectorAll('.toggle .seg').forEach(s => s.classList.remove('active'));
       seg.classList.add('active');
       cmd.innerHTML = cmds[seg.dataset.mode];
+    });
+  });
+
+  function cmdText(box) {
+    const holder = box.querySelector('span:not(.copy)');
+    const clone = holder.cloneNode(true);
+    clone.querySelectorAll('.pmt').forEach(p => p.remove());
+    return clone.textContent.trim();
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return; } catch (e) {}
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+  }
+  document.querySelectorAll('.install').forEach(box => {
+    const btn = box.querySelector('.copy');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      await copyText(cmdText(box));
+      btn.classList.add('done');
+      btn.textContent = (window.t ? t('copied') : 'copied ✓');
+      const ns = document.getElementById('next-step');
+      if (ns) ns.classList.add('show');
+      clearTimeout(btn._t);
+      btn._t = setTimeout(() => {
+        btn.classList.remove('done');
+        btn.textContent = (window.t ? t('copy') : 'copy');
+      }, 1800);
     });
   });
 </script>
