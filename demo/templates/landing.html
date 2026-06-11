@@ -97,9 +97,12 @@
   .install .copy { color: var(--muted); font-size: 12px; border-left: 1px solid var(--border); padding-left: 12px; cursor: pointer; user-select: none; transition: color .15s; }
   .install .copy:hover { color: var(--text); }
   .install .copy.done { color: var(--accent); font-weight: 600; }
-  .nextstep { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: var(--muted); opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .25s; }
-  .nextstep.show { opacity: 1; transform: none; }
+  .nextstep { display: none; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: var(--muted); }
+  .nextstep.show { display: flex; animation: ns-in .28s ease both; }
+  @keyframes ns-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
   .nextstep code { font-family: var(--mono); font-size: 13px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 7px; padding: 6px 12px; color: var(--code); }
+  .nextstep .ns-docs { color: var(--text); font-weight: 600; text-decoration: underline; }
+  .nextstep .ns-docs:hover { color: var(--muted); }
 
   /* DEMO SPLIT */
   .demo { display: grid; grid-template-columns: 1fr 1.2fr; gap: 0; margin: 60px 0; text-align: left;
@@ -191,6 +194,7 @@
     <div id="next-step" class="nextstep">
       <span data-i18n="ns_label">Now, in your code:</span>
       <code>from bytecraw import Scraper</code>
+      <a href="/docs" class="ns-docs" data-i18n="ns_docs">For more, see the Docs →</a>
     </div>
 
     <div class="demo">
