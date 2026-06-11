@@ -238,7 +238,9 @@ def analyze():
                 "titulo": tr["s2_browser_t"],
                 "detalle": tr["s2_browser_d"].format(elapsed=page.elapsed),
             })
-        except ImportError:
+        except Exception:
+            # En Vercel no hay Chromium (ni binario de Playwright). Cualquier
+            # fallo al abrir el navegador -> caemos a "solo estático".
             falta_chromium = True
             pasos.append({
                 "titulo": tr["s2_missing_t"],
