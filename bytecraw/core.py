@@ -1,9 +1,9 @@
 """
-Núcleo de la librería ByteCraw.
+ByteCraw library core.
 
-Diseño: un objeto Scraper que sabe obtener una página con la estrategia que
-quieras (o la mejor automáticamente) y te devuelve un objeto Page sobre el que
-extraes datos con selectores CSS sencillos.
+Design: a Scraper object that knows how to fetch a page with the strategy you
+want (or the best one automatically) and gives you back a Page object from
+which you extract data with simple CSS selectors.
 """
 
 from __future__ import annotations
@@ -22,25 +22,26 @@ DEFAULT_UA = (
 )
 
 def _decoded_html(r: requests.Response) -> str:
-    """Texto de la respuesta con la codificación correcta.
+    """Response text with the correct encoding.
 
-    requests cae a ISO-8859-1 cuando el header no trae charset (RFC 2616), lo
-    que rompe UTF-8 (£ -> Â£). Si pasa eso, usamos la detección por contenido.
+    requests falls back to ISO-8859-1 when the header has no charset
+    (RFC 2616), which breaks UTF-8 (£ -> Â£). When that happens, use
+    content-based detection instead.
     """
     if r.encoding is None or r.encoding.lower() == "iso-8859-1":
         r.encoding = r.apparent_encoding
     return r.text
 
 
-# Parsea selectores tipo "p.price::text" o "h3 a::attr(title)"
+# Parses selectors like "p.price::text" or "h3 a::attr(title)"
 _PSEUDO = re.compile(r"^(?P<sel>.*?)(?:::(?P<op>text|attr)\((?P<arg>[^)]*)\)|::(?P<op2>text))?$")
 
 
 def _split_selector(spec: str) -> tuple[str, str, str | None]:
-    """Devuelve (selector_css, operacion, argumento).
+    """Returns (css_selector, operation, argument).
 
-    operacion: "text" (por defecto) o "attr". argumento: nombre del atributo.
-    Ejemplos:
+    operation: "text" (default) or "attr". argument: the attribute name.
+    Examples:
       "p.price_color::text"   -> ("p.price_color", "text", None)
       "h3 a::attr(title)"     -> ("h3 a", "attr", "title")
       "div.quote"             -> ("div.quote", "text", None)
@@ -64,11 +65,11 @@ def _value_from(node, op: str, arg: str | None) -> str | None:
 
 @dataclass
 class Page:
-    """Una página ya descargada. Sobre ella extraes datos."""
+    """An already-downloaded page. Extract data from it."""
 
     url: str
     html: str = ""
-    data: Any = None          # JSON si vino de una API
+    data: Any = None          # JSON if it came from an API
     method: str = "static"    # static | api | browser
     elapsed: float = 0.0
     status: int = 200
@@ -80,44 +81,44 @@ class Page:
             self._soup = BeautifulSoup(self.html or "", "lxml")
         return self._soup
 
-    # --- extracción ---------------------------------------------------------
+    # --- extraction ---------------------------------------------------------
     def css(self, spec: str) -> str | None:
-        """Primer match de un selector. Soporta ::text y ::attr(nombre)."""
+        """First match of a selector. Supports ::text and ::attr(name)."""
         sel, op, arg = _split_selector(spec)
         return _value_from(self.soup.select_one(sel), op, arg)
 
     def css_all(self, spec: str) -> list[str]:
-        """Todos los matches de un selector."""
+        """All matches of a selector."""
         sel, op, arg = _split_selector(spec)
         return [v for n in self.soup.select(sel) if (v := _value_from(n, op, arg)) is not None]
 
     def extract(self, item: str, fields: dict[str, str]) -> list[dict]:
-        """Extrae una lista de registros.
+        """Extracts a list of records.
 
-        item:   selector CSS que delimita cada registro (ej. "article.product_pod").
-        fields: dict {nombre: selector_relativo}. El selector se aplica DENTRO de
-                cada item. Si un campo termina en "[]" devuelve lista de valores.
+        item:   CSS selector delimiting each record (e.g. "article.product_pod").
+        fields: dict {name: relative_selector}. The selector is applied INSIDE
+                each item. If a field name ends in "[]" it returns a list of values.
 
-        Ejemplo:
+        Example:
             page.extract("div.quote", {
-                "frase": "span.text::text",
-                "autor": "small.author::text",
+                "quote": "span.text::text",
+                "author": "small.author::text",
                 "tags[]": "a.tag::text",
             })
         """
-        registros = []
-        for nodo in self.soup.select(item):
-            fila = {}
-            for nombre, spec in fields.items():
+        records = []
+        for node in self.soup.select(item):
+            row = {}
+            for name, spec in fields.items():
                 sel, op, arg = _split_selector(spec)
-                if nombre.endswith("[]"):
-                    fila[nombre[:-2]] = [
-                        v for n in nodo.select(sel) if (v := _value_from(n, op, arg)) is not None
+                if name.endswith("[]"):
+                    row[name[:-2]] = [
+                        v for n in node.select(sel) if (v := _value_from(n, op, arg)) is not None
                     ]
                 else:
-                    fila[nombre] = _value_from(nodo.select_one(sel), op, arg)
-            registros.append(fila)
-        return registros
+                    row[name] = _value_from(node.select_one(sel), op, arg)
+            records.append(row)
+        return records
 
     def links(self) -> list[str]:
         return [a["href"] for a in self.soup.select("a[href]")]
@@ -127,7 +128,7 @@ class Page:
 
     # --- LLM ----------------------------------------------------------------
     def markdown(self, main_only: bool = True) -> str:
-        """Convierte la página a Markdown limpio (ahorra tokens para LLMs)."""
+        """Converts the page to clean Markdown (saves tokens for LLMs)."""
         if main_only:
             try:
                 import trafilatura
@@ -142,13 +143,13 @@ class Page:
         return markdownify(self.html, strip=["script", "style"])
 
     def tokens(self, of: str | None = None) -> int:
-        """Estimación rápida de tokens (~4 chars/token)."""
-        texto = of if of is not None else (self.html or "")
-        return len(texto) // 4
+        """Quick token estimate (~4 chars/token)."""
+        text = of if of is not None else (self.html or "")
+        return len(text) // 4
 
 
 class Session:
-    """Sesión autenticada reutilizable (cookies + headers persisten)."""
+    """Reusable authenticated session (cookies + headers persist)."""
 
     def __init__(self, scraper: "Scraper"):
         self._s = requests.Session()
@@ -156,7 +157,7 @@ class Session:
         self._scraper = scraper
 
     def login(self, url: str, data: dict, csrf_field: str | None = None) -> "Session":
-        """Hace login. Si csrf_field se indica, lo lee del formulario primero."""
+        """Logs in. If csrf_field is given, reads it from the form first."""
         if csrf_field:
             r = self._s.get(url, timeout=self._scraper.timeout)
             token = BeautifulSoup(_decoded_html(r), "lxml").select_one(f'input[name="{csrf_field}"]')
@@ -178,7 +179,7 @@ class Session:
 
 
 class Scraper:
-    """Punto de entrada. Elige la estrategia o deja que decida sola."""
+    """Entry point. Pick a strategy or let it decide on its own."""
 
     def __init__(self, user_agent: str = DEFAULT_UA, delay: float = 0.0, timeout: int = 15):
         self.user_agent = user_agent
@@ -187,9 +188,9 @@ class Scraper:
         self._session = requests.Session()
         self._session.headers.update({"User-Agent": user_agent})
 
-    # --- estrategias --------------------------------------------------------
+    # --- strategies -----------------------------------------------------------
     def static(self, url: str) -> Page:
-        """Técnica 1: HTML estático con requests."""
+        """Technique 1: static HTML with requests."""
         t0 = time.perf_counter()
         r = self._session.get(url, timeout=self.timeout)
         r.raise_for_status()
@@ -198,7 +199,7 @@ class Scraper:
                     elapsed=round(time.perf_counter() - t0, 3), status=r.status_code)
 
     def api(self, url: str, params: dict | None = None) -> Page:
-        """Técnica 3: pide una API y guarda el JSON."""
+        """Technique 3: requests an API and stores the JSON."""
         t0 = time.perf_counter()
         r = self._session.get(url, params=params, timeout=self.timeout)
         r.raise_for_status()
@@ -207,7 +208,7 @@ class Scraper:
                     elapsed=round(time.perf_counter() - t0, 3), status=r.status_code)
 
     def browser(self, url: str, wait: str | None = None, scroll: bool = False) -> Page:
-        """Técnica 2: navegador real (Playwright) para sitios con JS."""
+        """Technique 2: real browser (Playwright) for JS-rendered sites."""
         from playwright.sync_api import sync_playwright
 
         t0 = time.perf_counter()
@@ -227,10 +228,10 @@ class Scraper:
                     elapsed=round(time.perf_counter() - t0, 3))
 
     def fetch(self, url: str, strategy: str = "auto") -> Page:
-        """Obtiene la página. strategy: auto | static | browser.
+        """Fetches the page. strategy: auto | static | browser.
 
-        'auto' descarga estático y, si la página parece vacía (típico de SPAs
-        que rellenan con JS), reintenta con navegador.
+        'auto' downloads statically and, if the page looks empty (typical of
+        SPAs that render with JS), retries with a browser.
         """
         if strategy == "static":
             return self.static(url)
@@ -238,8 +239,8 @@ class Scraper:
             return self.browser(url)
         # auto
         page = self.static(url)
-        texto = page.soup.get_text(strip=True)
-        if len(texto) < 200:  # heurística: casi sin contenido -> probablemente JS
+        text = page.soup.get_text(strip=True)
+        if len(text) < 200:  # heuristic: almost no content -> probably JS
             return self.browser(url)
         return page
 
@@ -253,35 +254,35 @@ class Scraper:
         pages: int | None = None,
         base: str | None = None,
     ) -> list[dict]:
-        """Recorre varias páginas siguiendo el enlace 'next' y extrae 'fields'.
+        """Walks multiple pages following the 'next' link and extracts 'fields'.
 
-        start:  URL inicial.
-        item:   selector de cada registro.
-        fields: campos a extraer (ver Page.extract).
-        next:   selector del enlace a la siguiente página (ej. "li.next a::attr(href)").
-        pages:  límite opcional de páginas.
-        base:   prefijo para URLs relativas (si no, se infiere del host).
+        start:  initial URL.
+        item:   selector for each record.
+        fields: fields to extract (see Page.extract).
+        next:   selector for the next-page link (e.g. "li.next a::attr(href)").
+        pages:  optional page limit.
+        base:   prefix for relative URLs (otherwise inferred from the host).
         """
         from urllib.parse import urljoin
 
         url = start
-        todos: list[dict] = []
+        results: list[dict] = []
         n = 0
         while url:
             page = self.static(url)
-            todos.extend(page.extract(item, fields))
+            results.extend(page.extract(item, fields))
             n += 1
             if pages and n >= pages:
                 break
             if not next:
                 break
             sel, op, arg = _split_selector(next)
-            nodo = page.soup.select_one(sel)
-            href = _value_from(nodo, op if op != "text" else "attr", arg or "href") if nodo else None
+            node = page.soup.select_one(sel)
+            href = _value_from(node, op if op != "text" else "attr", arg or "href") if node else None
             url = urljoin(base or url, href) if href else None
-        return todos
+        return results
 
-    # --- sesión -------------------------------------------------------------
+    # --- session --------------------------------------------------------------
     def session(self) -> Session:
         return Session(self)
 

@@ -1,0 +1,15 @@
+# Quickstart
+
+```python
+from bytecraw import Scraper
+
+bot = Scraper(delay=0.5)
+page = bot.static("https://books.toscrape.com")
+
+print(page.status, page.method, page.elapsed)
+print(page.css("h1"))
+```
+
+---
+
+[← Volver al índice](../README.md) · [Siguiente: HTML estático →](01-html-estatico.md)

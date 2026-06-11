@@ -207,7 +207,7 @@ home = s.<span class="f">fetch</span>(<span class="s">"https://quotes.toscrape.c
 
 <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 <script>
-  // Resalta el item del sidebar según la sección visible
+  // Highlights the sidebar item for the visible section
   const links = [...document.querySelectorAll('aside a')];
   const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
   const obs = new IntersectionObserver((entries) => {

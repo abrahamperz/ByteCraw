@@ -1,26 +1,26 @@
 """
-Crawlers de grafo para ByteCraw: BFS, Shark-Search y OPIC.
+Graph crawlers for ByteCraw: BFS, Shark-Search and OPIC.
 
-La web es un grafo (páginas = nodos, links = aristas). Un crawler decide en
-qué ORDEN visitar las URLs con un presupuesto limitado de requests. Cada
-estrategia es una respuesta distinta a esa pregunta:
+The web is a graph (pages = nodes, links = edges). A crawler decides in
+what ORDER to visit URLs with a limited request budget. Each strategy is
+a different answer to that question:
 
-  BFS          — por niveles: primero lo más cercano a la semilla.
-  Shark-Search — best-first temático: persigue páginas relevantes a un query
-                 (Hersovici et al., 1998). Los links heredan score del padre
-                 con decaimiento; las ramas malas se apagan solas.
+  BFS          — level by level: closest to the seed first.
+  Shark-Search — topical best-first: chases pages relevant to a query
+                 (Hersovici et al., 1998). Links inherit score from their
+                 parent with decay; bad branches die out on their own.
   OPIC         — On-line Page Importance Computation (Abiteboul et al., 2003):
-                 cada página tiene "cash" que reparte a sus links al ser
-                 visitada. Es PageRank calculado en vivo, sin el grafo completo.
+                 each page holds "cash" that it distributes to its links when
+                 visited. It is PageRank computed live, without the full graph.
 
-Uso:
+Usage:
 
     from bytecraw.crawler import BFS, SharkSearch, OPIC, pagerank
 
     result = SharkSearch(query="machine learning").crawl(
         "https://example.com", max_pages=100)
-    result.pages          # visitadas, en orden
-    result.graph          # {url: [links]} para análisis offline
+    result.pages          # visited, in order
+    result.graph          # {url: [links]} for offline analysis
     pagerank(result.graph)
 """
 
@@ -36,7 +36,7 @@ from urllib.parse import urldefrag, urljoin, urlparse
 
 from .core import Scraper
 
-# Extensiones que no son HTML: no vale la pena gastarles un request.
+# Non-HTML extensions: not worth spending a request on them.
 _SKIP_EXT = re.compile(
     r"\.(png|jpe?g|gif|svg|webp|ico|css|js|pdf|zip|gz|tar|mp[34]|avi|mov|woff2?|ttf|xml|rss)$",
     re.IGNORECASE,
@@ -50,10 +50,10 @@ def _tokens(text: str) -> list[str]:
 
 
 def cosine(text_a: str, text_b: str) -> float:
-    """Similitud coseno entre dos textos usando vectores de frecuencia (TF).
+    """Cosine similarity between two texts using term-frequency (TF) vectors.
 
-    Es la métrica clásica de recuperación de información: 1.0 = mismo
-    vocabulario en la misma proporción, 0.0 = ni una palabra en común.
+    The classic information-retrieval metric: 1.0 = same vocabulary in the
+    same proportions, 0.0 = not a single word in common.
     """
     a, b = Counter(_tokens(text_a)), Counter(_tokens(text_b))
     if not a or not b:
@@ -65,7 +65,7 @@ def cosine(text_a: str, text_b: str) -> float:
 
 
 def normalize(url: str, base: str) -> str | None:
-    """Resuelve relativas, quita #fragmentos y filtra lo que no es página web."""
+    """Resolve relative URLs, strip #fragments and filter out non-web-page URLs."""
     absolute, _ = urldefrag(urljoin(base, url))
     parsed = urlparse(absolute)
     if parsed.scheme not in ("http", "https"):
@@ -76,18 +76,18 @@ def normalize(url: str, base: str) -> str | None:
 
 
 class Frontier:
-    """Priority queue de URLs pendientes con dedup.
+    """Priority queue of pending URLs with dedup.
 
-    heapq es un min-heap, así que guardamos -score para sacar siempre la URL
-    de MAYOR score. Si una URL se re-encola con score nuevo (pasa en OPIC,
-    donde el cash se acumula), usamos "lazy deletion": las entradas viejas se
-    descartan al hacer pop comparando contra el score vigente.
+    heapq is a min-heap, so we store -score to always pop the URL with the
+    HIGHEST score. If a URL gets re-pushed with a new score (happens in OPIC,
+    where cash accumulates), we use lazy deletion: stale entries are discarded
+    on pop by comparing against the current score.
     """
 
     def __init__(self):
         self._heap: list[tuple[float, int, str]] = []
         self._score: dict[str, float] = {}
-        self._counter = 0  # desempate FIFO entre scores iguales
+        self._counter = 0  # FIFO tie-break between equal scores
 
     def push(self, url: str, score: float):
         current = self._score.get(url)
@@ -114,7 +114,7 @@ class Frontier:
 
 @dataclass
 class CrawlResult:
-    """Lo que devuelve un crawl: páginas, grafo y números para comparar."""
+    """What a crawl returns: pages, graph and numbers for comparison."""
 
     strategy: str
     pages: list[dict] = field(default_factory=list)   # url, title, score, relevance, depth, order
@@ -129,11 +129,11 @@ class CrawlResult:
 
 
 class Crawler:
-    """Crawler BFS. Las subclases solo cambian CÓMO se puntúan los links.
+    """BFS crawler. Subclasses only change HOW links are scored.
 
-    El loop es idéntico para todas las estrategias (pop → fetch → extraer
-    links → puntuar → push); así la comparación entre estrategias es justa:
-    mismo código, distinta función de orden.
+    The loop is identical for every strategy (pop → fetch → extract links →
+    score → push); that keeps the comparison between strategies fair:
+    same code, different ordering function.
     """
 
     name = "bfs"
@@ -144,26 +144,26 @@ class Crawler:
         self.same_domain = same_domain
         self.scraper = Scraper(delay=delay, timeout=timeout)
 
-    # --- punto de extensión ---------------------------------------------------
+    # --- extension point -------------------------------------------------------
     def score_links(self, url: str, links: list[dict], relevance: float,
                     depth: int) -> list[tuple[str, float]]:
-        """BFS: el score solo codifica la profundidad (menos profundo = antes).
+        """BFS: the score only encodes depth (shallower = visited sooner).
 
-        links: [{url, anchor}]. Devuelve [(url, score)] para la frontier.
+        links: [{url, anchor}]. Returns [(url, score)] for the frontier.
         """
         return [(l["url"], -(depth + 1)) for l in links]
 
     def on_visit(self, url: str, links: list[dict]):
-        """Hook para estado propio de la estrategia (OPIC reparte cash aquí)."""
+        """Hook for strategy-specific state (OPIC distributes cash here)."""
 
     def initial_score(self, url: str) -> float:
         return 0.0
 
-    # --- loop común -------------------------------------------------------------
+    # --- shared loop -------------------------------------------------------------
     def crawl(self, start: str, max_pages: int = 50, max_depth: int = 10) -> CrawlResult:
         start_norm = normalize(start, start)
         if not start_norm:
-            raise ValueError(f"URL inválida: {start}")
+            raise ValueError(f"Invalid URL: {start}")
         domain = urlparse(start_norm).netloc
 
         frontier = Frontier()
@@ -232,18 +232,18 @@ class Crawler:
 
 
 class BFS(Crawler):
-    """Alias explícito del comportamiento base."""
+    """Explicit alias of the base behavior."""
 
     name = "bfs"
 
 
 class SharkSearch(Crawler):
-    """Best-first temático con herencia de score (Hersovici et al., 1998).
+    """Topical best-first with score inheritance (Hersovici et al., 1998).
 
-    score(link) = γ·heredado + (1−γ)·señal_local
-      heredado    = δ·relevancia(padre) si el padre fue relevante,
-                    si no δ·heredado(padre)  → las ramas malas decaen δ^n.
-      señal_local = coseno(anchor + palabras de la URL, query).
+    score(link) = γ·inherited + (1−γ)·local_signal
+      inherited    = δ·relevance(parent) if the parent was relevant,
+                     otherwise δ·inherited(parent)  → bad branches decay as δ^n.
+      local_signal = cosine(anchor + URL words, query).
     """
 
     name = "shark"
@@ -259,9 +259,9 @@ class SharkSearch(Crawler):
         return 1.0
 
     def score_links(self, url, links, relevance, depth):
-        # Herencia: si el padre fue relevante, los hijos heredan su relevancia;
-        # si no, heredan lo que el padre había heredado. En ambos casos con
-        # decaimiento delta: una rama sin señal se apaga como delta^n.
+        # Inheritance: if the parent was relevant, children inherit its
+        # relevance; otherwise they inherit what the parent had inherited.
+        # Either way with delta decay: a branch with no signal fades as delta^n.
         parent_inherited = self._inherited.get(url, 0.0)
         inherited = self.delta * (relevance if relevance > 0.05 else parent_inherited)
         scored = []
@@ -275,14 +275,14 @@ class SharkSearch(Crawler):
 
 
 class OPIC(Crawler):
-    """Importancia estructural online (Abiteboul et al., 2003).
+    """Online structural importance (Abiteboul et al., 2003).
 
-    Cada página tiene cash. Al visitarla: su cash se suma a su historial
-    (importancia acumulada), se pone a 0 y se reparte equitativamente entre
-    sus links de salida. Se visita siempre la URL con más cash pendiente.
-    El total de cash del sistema se conserva (invariante del algoritmo).
-    Las páginas sin links de salida (sumideros) devuelven su cash a las URLs
-    conocidas no visitadas: el "nodo virtual" del paper, versión inmediata.
+    Each page holds cash. On visit: its cash is added to its history
+    (accumulated importance), reset to 0 and split evenly among its outgoing
+    links. The URL with the most pending cash is always visited next.
+    Total system cash is conserved (the algorithm's invariant).
+    Pages with no outgoing links (sinks) return their cash to the known
+    unvisited URLs: the paper's "virtual node", immediate version.
     """
 
     name = "opic"
@@ -311,16 +311,16 @@ class OPIC(Crawler):
             self._known_unvisited.add(t)
 
     def score_links(self, url, links, relevance, depth):
-        # El cash ya se repartió en on_visit; el score ES el cash acumulado.
+        # Cash was already distributed in on_visit; the score IS the accumulated cash.
         return [(l["url"], self.cash.get(l["url"], 0.0)) for l in links]
 
 
 def pagerank(graph: dict[str, list[str]], damping: float = 0.85,
              iterations: int = 30) -> dict[str, float]:
-    """PageRank por iteración de potencias sobre el grafo crawleado.
+    """PageRank via power iteration over the crawled graph.
 
-    Versión offline del mismo concepto que OPIC aproxima online: comparar
-    ambos rankings sobre el mismo grafo es el experimento interesante.
+    Offline version of the same concept OPIC approximates online: comparing
+    both rankings over the same graph is the interesting experiment.
     """
     nodes = set(graph) | {v for vs in graph.values() for v in vs}
     if not nodes:
@@ -335,7 +335,7 @@ def pagerank(graph: dict[str, list[str]], damping: float = 0.85,
                 share = damping * rank[u] / len(out)
                 for v in out:
                     new[v] += share
-            else:  # sumidero: reparte a todos (nodo virtual)
+            else:  # sink: distribute to all (virtual node)
                 share = damping * rank[u] / n
                 for v in nodes:
                     new[v] += share

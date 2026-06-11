@@ -158,12 +158,12 @@
 
 <div class="wrap">
   <div class="grid">
-    {% for clave, t in tecnicas.items() %}
-    <div class="card" data-clave="{{ clave }}">
-      <h2 data-i18n="card_{{ clave }}_t">{{ t.titulo }}</h2>
-      <div class="micro">{{ t.subtitulo }}</div>
-      <div class="desc" data-i18n="card_{{ clave }}_d">{{ t.descripcion }}</div>
-      <span class="site">{{ t.sitio }}</span>
+    {% for key, t in techniques.items() %}
+    <div class="card" data-key="{{ key }}">
+      <h2 data-i18n="card_{{ key }}_t">{{ t.title }}</h2>
+      <div class="micro">{{ t.subtitle }}</div>
+      <div class="desc" data-i18n="card_{{ key }}_d">{{ t.description }}</div>
+      <span class="site">{{ t.site }}</span>
     </div>
     {% endfor %}
   </div>

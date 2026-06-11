@@ -184,12 +184,12 @@ async function analyze() {
 function renderAnalysis(j) {
   const out = document.getElementById("azr-out");
   const steps = j.steps.map(s =>
-    `<div class="azr-step"><div class="st">${escapeHtml(s.titulo)}</div><div class="sd">${escapeHtml(s.detalle)}</div></div>`
+    `<div class="azr-step"><div class="st">${escapeHtml(s.title)}</div><div class="sd">${escapeHtml(s.detail)}</div></div>`
   ).join("");
   const tokens = j.tokens_md != null
     ? `<span class="badge">tokens HTML→Markdown: <b>${j.tokens_html} → ${j.tokens_md}</b></span>` : "";
   const meta = `<div class="azr-meta">
-    <span class="badge">${t("badge_title")}: <b>${escapeHtml(j.titulo)}</b></span>
+    <span class="badge">${t("badge_title")}: <b>${escapeHtml(j.title)}</b></span>
     <span class="badge">${t("badge_links")}: <b>${j.links}</b></span>
     ${tokens}
   </div>`;

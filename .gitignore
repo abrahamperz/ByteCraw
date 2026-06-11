@@ -23,3 +23,4 @@ examples/*.md
 
 # Generated output at root
 /pagina.md
+.vercel

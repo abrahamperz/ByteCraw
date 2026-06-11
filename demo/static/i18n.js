@@ -46,8 +46,8 @@
       m_s_many: '<span class="n">4</span> Thousands of pages?',
       m_s_login: '<span class="n">5</span> Behind login?',
       m_s_download: '<span class="n">6</span> Download the output',
-      card_estatico_t: "1 · Static HTML", card_estatico_d: "The server sends the full HTML. We fetch it and parse it with CSS selectors.",
-      card_dinamico_t: "2 · Dynamic JS", card_dinamico_d: "JS fills the page. We launch a real browser and read the rendered DOM.",
+      card_static_t: "1 · Static HTML", card_static_d: "The server sends the full HTML. We fetch it and parse it with CSS selectors.",
+      card_dynamic_t: "2 · Dynamic JS", card_dynamic_d: "JS fills the page. We launch a real browser and read the rendered DOM.",
       card_api_t: "3 · Intercepted API", card_api_d: "Behind the JS there's an API with clean JSON. We hit it and skip the HTML.",
       card_scrapy_t: "4 · Scrapy at scale", card_scrapy_d: "Industrial framework: handles URL queue, parallelism, retries and export.",
       card_login_t: "5 · API with login", card_login_d: "Data behind a login. We reuse the session cookie/token on every request.",
@@ -125,8 +125,8 @@
       m_s_many: '<span class="n">4</span> ¿Miles de páginas?',
       m_s_login: '<span class="n">5</span> ¿Tras login?',
       m_s_download: '<span class="n">6</span> Descargar el output',
-      card_estatico_t: "1 · HTML estático", card_estatico_d: "El servidor manda el HTML completo. Lo pedimos y parseamos con selectores CSS.",
-      card_dinamico_t: "2 · JS dinámico", card_dinamico_d: "El JS rellena la página. Lanzamos un navegador real y leemos el DOM ya pintado.",
+      card_static_t: "1 · HTML estático", card_static_d: "El servidor manda el HTML completo. Lo pedimos y parseamos con selectores CSS.",
+      card_dynamic_t: "2 · JS dinámico", card_dynamic_d: "El JS rellena la página. Lanzamos un navegador real y leemos el DOM ya pintado.",
       card_api_t: "3 · API interceptada", card_api_d: "Detrás del JS hay una API con JSON limpio. La copiamos y nos saltamos el HTML.",
       card_scrapy_t: "4 · Scrapy a escala", card_scrapy_d: "Framework industrial: maneja cola de URLs, paralelismo, reintentos y export.",
       card_login_t: "5 · API con login", card_login_d: "Datos detrás de login. Reutilizamos la cookie/token de sesión en cada petición.",
@@ -204,8 +204,8 @@
       m_s_many: '<span class="n">4</span> Milhares de páginas?',
       m_s_login: '<span class="n">5</span> Atrás de login?',
       m_s_download: '<span class="n">6</span> Baixar o output',
-      card_estatico_t: "1 · HTML estático", card_estatico_d: "O servidor envia o HTML completo. Pedimos e parseamos com seletores CSS.",
-      card_dinamico_t: "2 · JS dinâmico", card_dinamico_d: "O JS preenche a página. Lançamos um navegador real e lemos o DOM renderizado.",
+      card_static_t: "1 · HTML estático", card_static_d: "O servidor envia o HTML completo. Pedimos e parseamos com seletores CSS.",
+      card_dynamic_t: "2 · JS dinâmico", card_dynamic_d: "O JS preenche a página. Lançamos um navegador real e lemos o DOM renderizado.",
       card_api_t: "3 · API interceptada", card_api_d: "Por trás do JS há uma API com JSON limpo. Acessamos e pulamos o HTML.",
       card_scrapy_t: "4 · Scrapy em escala", card_scrapy_d: "Framework industrial: gerencia fila de URLs, paralelismo, retentativas e export.",
       card_login_t: "5 · API com login", card_login_d: "Dados atrás de login. Reutilizamos o cookie/token de sessão em cada requisição.",
@@ -251,7 +251,7 @@
 
   let current = getLang();
 
-  // t(key): traducción puntual para strings generados en JS.
+  // t(key): one-off translation for strings generated in JS.
   window.t = function (key) {
     return (DICT[current] && DICT[current][key]) || (DICT.en[key] != null ? DICT.en[key] : key);
   };
