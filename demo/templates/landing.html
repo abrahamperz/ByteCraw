@@ -193,7 +193,7 @@
     </div>
     <div id="next-step" class="nextstep">
       <span data-i18n="ns_label">Now, in your code:</span>
-      <code>from bytecraw import Scraper</code>
+      <code id="ns-code">from bytecraw import Scraper</code>
       <a href="/docs" class="ns-docs" data-i18n="ns_docs">For more, see the Docs →</a>
     </div>
 
@@ -332,12 +332,18 @@ md = page.<span class="f">markdown</span>()</code></pre>
     humans: '<span class="pmt">$</span> python3 -m pip install bytecraw',
     agents: '<span class="pmt">&gt;&gt;&gt;</span> Scraper().fetch(url).markdown()',
   };
+  const nextSnippet = {
+    humans: 'from bytecraw import Scraper',
+    agents: 'md = Scraper().fetch(url).markdown()',
+  };
   const cmd = document.getElementById('install-cmd');
+  const nsCode = document.getElementById('ns-code');
   document.querySelectorAll('.toggle .seg').forEach(seg => {
     seg.addEventListener('click', () => {
       document.querySelectorAll('.toggle .seg').forEach(s => s.classList.remove('active'));
       seg.classList.add('active');
       cmd.innerHTML = cmds[seg.dataset.mode];
+      if (nsCode) nsCode.textContent = nextSnippet[seg.dataset.mode];
     });
   });
 
