@@ -1,54 +1,54 @@
 """
-Técnica 4 — Scrapy: scraping a escala
-======================================
-Cuando ya no es una página sino miles. Scrapy maneja por ti la cola de URLs,
-la concurrencia (varias peticiones en paralelo), reintentos, rate limiting y
-la exportación de datos. Es la diferencia entre un script y un crawler industrial.
+Technique 4 — Scrapy: scraping at scale
+=======================================
+When it's no longer one page but thousands. Scrapy handles the URL queue,
+concurrency (parallel requests), retries, rate limiting and data export for
+you. It's the difference between a script and an industrial crawler.
 
-Normalmente Scrapy se usa con un proyecto completo (scrapy startproject ...),
-pero aquí lo dejamos en un solo archivo ejecutable para practicar.
+Scrapy is normally used as a full project (scrapy startproject ...), but
+here we keep it in a single runnable file for practice.
 
-Sitio de práctica: https://quotes.toscrape.com (con paginación)
+Practice site: https://quotes.toscrape.com (with pagination)
 
-Antes de correr:  pip install scrapy
-Correr:           python 04_scrapy_spider.py
-Genera:           frases_scrapy.json
+Before running:  pip install scrapy
+Run:             python 04_scrapy_spider.py
+Generates:       frases_scrapy.json
 """
 
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
 
-class FrasesSpider(scrapy.Spider):
-    name = "frases"
+class QuotesSpider(scrapy.Spider):
+    name = "quotes"
     start_urls = ["https://quotes.toscrape.com/"]
 
-    # Buenas prácticas integradas en Scrapy: identifícate y no martilles el server
+    # Good practices built into Scrapy: identify yourself and don't hammer the server
     custom_settings = {
-        "USER_AGENT": "practica-scraping (+https://ejemplo.com)",
-        "DOWNLOAD_DELAY": 0.5,        # espera entre peticiones
-        "CONCURRENT_REQUESTS": 4,      # peticiones en paralelo
-        "AUTOTHROTTLE_ENABLED": True,  # ajusta la velocidad solo
+        "USER_AGENT": "scraping-practice (+https://example.com)",
+        "DOWNLOAD_DELAY": 0.5,        # wait between requests
+        "CONCURRENT_REQUESTS": 4,      # parallel requests
+        "AUTOTHROTTLE_ENABLED": True,  # auto-adjusts the speed
         "FEEDS": {"frases_scrapy.json": {"format": "json", "overwrite": True}},
     }
 
     def parse(self, response):
-        # yield de cada item -> Scrapy los junta y exporta solo
+        # yield each item -> Scrapy collects and exports them on its own
         for q in response.css("div.quote"):
             yield {
-                "frase": q.css("span.text::text").get(),
-                "autor": q.css("small.author::text").get(),
+                "quote": q.css("span.text::text").get(),
+                "author": q.css("small.author::text").get(),
                 "tags": q.css("a.tag::text").getall(),
             }
 
-        # Seguir a la siguiente página: Scrapy encola la URL automáticamente
-        siguiente = response.css("li.next a::attr(href)").get()
-        if siguiente:
-            yield response.follow(siguiente, callback=self.parse)
+        # Follow the next page: Scrapy queues the URL automatically
+        next_page = response.css("li.next a::attr(href)").get()
+        if next_page:
+            yield response.follow(next_page, callback=self.parse)
 
 
 if __name__ == "__main__":
-    proceso = CrawlerProcess()
-    proceso.crawl(FrasesSpider)
-    proceso.start()
-    print("\nGuardado en frases_scrapy.json")
+    process = CrawlerProcess()
+    process.crawl(QuotesSpider)
+    process.start()
+    print("\nSaved to frases_scrapy.json")
