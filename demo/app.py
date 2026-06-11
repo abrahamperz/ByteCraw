@@ -48,7 +48,11 @@ def _get_distinct_id() -> str:
 def _flush_posthog(response):
     # En serverless (Vercel) la función se congela tras responder y el envío
     # en segundo plano de posthog-python puede perderse: forzamos el flush.
-    posthog_client.flush()
+    # Nunca debe tumbar la respuesta si PostHog falla (red, token vacío, etc.).
+    try:
+        posthog_client.flush()
+    except Exception:
+        pass
     return response
 
 
@@ -262,18 +266,21 @@ def analyze():
     except Exception:
         pass
 
-    posthog_client.capture(
-        _get_distinct_id(),
-        "url_analyzed",
-        properties={
-            "method_used": page.method,
-            "used_browser": uso_navegador,
-            "chromium_missing": falta_chromium,
-            "steps_count": len(pasos),
-            "has_markdown": bool(md),
-            "token_reduction_ratio": round(tok_md / page.tokens(), 2) if tok_md else None,
-        },
-    )
+    try:
+        posthog_client.capture(
+            _get_distinct_id(),
+            "url_analyzed",
+            properties={
+                "method_used": page.method,
+                "used_browser": uso_navegador,
+                "chromium_missing": falta_chromium,
+                "steps_count": len(pasos),
+                "has_markdown": bool(md),
+                "token_reduction_ratio": round(tok_md / page.tokens(), 2) if tok_md else None,
+            },
+        )
+    except Exception:
+        pass
     return jsonify({
         "ok": True,
         "url": url,
