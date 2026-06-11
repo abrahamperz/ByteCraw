@@ -115,6 +115,9 @@
   .adv-card ol li { margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .adv-card .rel { color: var(--amber); font-weight: 700; font-family: var(--mono); font-size: 10.5px; }
   .adv-card.winner { border-color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+  .adv-explain { margin: 0 0 26px; }
+  .adv-explain .exp { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+  .adv-explain .formula { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--muted-2); background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 6px 10px; margin: 8px 0; }
   .adv-pr { margin-top: 18px; font-size: 12.5px; color: var(--muted); }
   .adv-pr code { font-family: var(--mono); font-size: 11.5px; color: var(--muted-2); }
 
@@ -174,6 +177,32 @@
     <div class="eyebrow" data-i18n="adv_eyebrow">Advanced methods</div>
     <h2 data-i18n="adv_h2">Graph crawling: BFS vs Shark-Search vs OPIC</h2>
     <p class="desc" data-i18n="adv_desc">The web is a graph. A crawler decides which URL to visit next with a limited request budget. BFS sweeps by levels, Shark-Search chases a topic (best-first with inherited scores), OPIC computes page importance online like a live PageRank. Same loop, different ordering — run all three on a site and compare.</p>
+    <div class="adv-grid adv-explain">
+      <div class="adv-card">
+        <h3>BFS</h3>
+        <div class="exp">
+          <span data-i18n="adv_exp_bfs_1">Classic level-order sweep: every link gets the score</span>
+          <span class="formula">score = −(depth + 1)</span>
+          <span data-i18n="adv_exp_bfs_2">so the closest pages to the seed are visited first. Uniform coverage, but blind to the topic: it spends requests on /login just like on /blog.</span>
+        </div>
+      </div>
+      <div class="adv-card">
+        <h3>Shark-Search</h3>
+        <div class="exp">
+          <span data-i18n="adv_exp_shark_1">Topical best-first. Each link blends what its parent passed down with its own anchor + URL words:</span>
+          <span class="formula">score = γ·inherited + (1−γ)·local</span>
+          <span data-i18n="adv_exp_shark_2">Children of a relevant parent inherit δ·relevance; barren branches decay as δⁿ and die off on their own. The crawler swarms the relevant region of the graph.</span>
+        </div>
+      </div>
+      <div class="adv-card">
+        <h3>OPIC</h3>
+        <div class="exp">
+          <span data-i18n="adv_exp_opic_1">Online importance, no query needed. The seed starts with cash = 1.0; on each visit the page banks its cash into its history and splits it evenly among its links:</span>
+          <span class="formula">cash(child) += cash(page) / out_links</span>
+          <span data-i18n="adv_exp_opic_2">Heavily linked pages accumulate cash from many parents and jump the queue — a live PageRank, computed while crawling.</span>
+        </div>
+      </div>
+    </div>
     <div class="adv-form">
       <input id="adv-url" type="url" value="https://quotes.toscrape.com" placeholder="https://...">
       <input id="adv-query" class="q" type="text" value="love life books" data-i18n-ph="adv_query_ph" placeholder="topic query (for Shark-Search)">
