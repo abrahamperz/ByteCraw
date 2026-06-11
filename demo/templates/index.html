@@ -70,7 +70,9 @@
   .card h2 { font-size: 17px; margin-bottom: 2px; }
   .card .micro { color: var(--muted); font-size: 12px; margin-bottom: 10px; font-family: var(--mono); }
   .card .desc { color: var(--muted); font-size: 13.5px; line-height: 1.55; min-height: 58px; }
-  .site { display: inline-block; margin: 10px 0 16px; font-size: 11px; color: var(--accent); background: var(--panel-2); border: 1px solid var(--border); padding: 4px 9px; border-radius: 6px; font-family: var(--mono); align-self: flex-start; }
+  .site { display: inline-block; margin: 10px 0 16px; font-size: 11px; color: var(--accent); background: var(--panel-2); border: 1px solid var(--border); padding: 4px 9px; border-radius: 6px; font-family: var(--mono); align-self: flex-start; text-decoration: none; transition: .15s; }
+  .site:hover { border-color: var(--border-2); color: var(--text); }
+  .site .site-label { color: var(--muted-2); font-family: inherit; }
   .btn { background: var(--text); color: #fff; border: none; border-radius: 9px; padding: 10px 16px; font-weight: 600; font-size: 14px; cursor: pointer; align-self: flex-start; transition: .15s; font-family: inherit; }
   .btn:hover { background: #27272a; }
   .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -166,7 +168,7 @@
       <h2 data-i18n="card_{{ key }}_t">{{ t.title }}</h2>
       <div class="micro">{{ t.subtitle }}</div>
       <div class="desc" data-i18n="card_{{ key }}_d">{{ t.description }}</div>
-      <span class="site">{{ t.site }}</span>
+      <a class="site" href="https://{{ t.site }}" target="_blank" rel="noopener"><span class="site-label" data-i18n="card_site_label">practice site:</span> {{ t.site }} ↗</a>
     </div>
     {% endfor %}
   </div>
