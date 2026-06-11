@@ -1,9 +1,13 @@
-# Proyecto de práctica: Web Scraping
+# ByteCraw
 
-5 técnicas de scraping + manejo de CAPTCHAs + truco de tokens, sobre sitios
-de práctica legales (`toscrape.com`).
+Una sola API de Python para scrapear cualquier sitio: HTML estático, JS dinámico,
+APIs ocultas, login con sesión, crawling y Markdown listo para LLMs.
 
-## Instalar desde PyPI
+- **Demo**: https://byte-craw.vercel.app/
+- **PyPI**: https://pypi.org/project/bytecraw/
+- **GitHub**: https://github.com/abrahamperz/ByteCraw
+
+## Instalación
 
 ```bash
 python3 -m venv .venv
@@ -12,93 +16,111 @@ python3 -m pip install bytecraw         # trae todo: estático, APIs, Markdown y
 python3 -m playwright install chromium  # solo si usas .browser()
 ```
 
-`bytecraw` ya incluye todas las dependencias (requests, beautifulsoup4, lxml,
-markdownify, trafilatura y playwright). El único paso extra es descargar el
-navegador con `playwright install chromium`, y solo si vas a usar `.browser()`.
-
-## La librería `bytecraw/`
-
-Las 5 técnicas envueltas en una sola API limpia (estilo SDK).
+## Quickstart
 
 ```python
 from bytecraw import Scraper
 
 bot = Scraper(delay=0.5)
+page = bot.static("https://books.toscrape.com")
 
-# Estrategias explícitas
-page = bot.static("https://books.toscrape.com")          # 1 · HTML estático
-page = bot.browser("https://quotes.toscrape.com/js")     # 2 · JS dinámico
-data = bot.api("https://quotes.toscrape.com/api/quotes") # 3 · API JSON
-page = bot.fetch(url, strategy="auto")                   # auto: estático -> navegador
+print(page.status, page.method, page.elapsed)
+print(page.css("h1"))
+```
 
-# Extraer registros con selectores (soporta ::text y ::attr(nombre))
+## Las técnicas
+
+Cada estrategia es un método explícito del `Scraper`. El orden, de lo más limpio
+a lo más costoso: API → estático → navegador → crawling → sesión.
+
+### 1 · HTML estático
+
+Para sitios donde el servidor ya manda el HTML completo. Una petición HTTP,
+parseo con selectores CSS (soporta `::text` y `::attr(nombre)`).
+
+```python
+page = bot.static("https://books.toscrape.com")
+
 libros = page.extract("article.product_pod", {
     "titulo": "h3 a::attr(title)",
     "precio": "p.price_color::text",
 })
+```
 
-# Crawling con paginación
-items = bot.crawl(url, item="div.quote",
+### 2 · JS dinámico (navegador)
+
+Cuando el contenido lo rellena JavaScript, abre un Chromium real (Playwright)
+y lee el DOM ya pintado. Puedes esperar a un selector o hacer scroll para lazy load.
+
+```python
+page = bot.browser("https://quotes.toscrape.com/js", scroll=True)
+print(page.css_all("span.text"))
+```
+
+### 3 · API oculta (JSON)
+
+Detrás del JS casi siempre hay una API con JSON limpio. La pides directo y te
+saltas el HTML por completo: lo más rápido y estable.
+
+```python
+data = bot.api("https://quotes.toscrape.com/api/quotes", params={"page": 1})
+print(data.json())
+```
+
+### 4 · Crawling con paginación
+
+Recorre múltiples páginas siguiendo el enlace "siguiente" y junta todos los registros.
+
+```python
+items = bot.crawl(
+    "https://quotes.toscrape.com",
+    item="div.quote",
     fields={"frase": "span.text::text", "tags[]": "a.tag::text"},
-    next="li.next a::attr(href)")
+    next="li.next a::attr(href)",
+)
+```
 
-# 5 · Sesión con login + CSRF
+### 5 · Login con sesión (CSRF / bearer)
+
+Reutiliza la cookie o token de sesión en cada petición para acceder a datos
+detrás de un login.
+
+```python
 s = bot.session().login(url, data=creds, csrf_field="csrf_token")
 home = s.fetch("https://quotes.toscrape.com")
 
-# LLM: HTML -> Markdown limpio (menos tokens)
-md = page.markdown()
+# o con token:
+s = bot.session().bearer("eyJhbGci...")
+```
+
+### Markdown para LLMs
+
+Convierte el HTML ruidoso en Markdown limpio: misma info, fracción de tokens.
+
+```python
+md = page.markdown()                 # solo el contenido principal
+md_full = page.markdown(main_only=False)  # toda la página
 print(page.tokens(), "->", page.tokens(of=md))
 ```
 
-## Landing page + dashboard
+## Estrategia mental
 
-- `http://127.0.0.1:5000/landing` — landing estilo Vercel/chat-sdk.dev
-- `http://127.0.0.1:5000/` — dashboard interactivo (ejecuta cada técnica + tiempos)
+Ante un sitio nuevo, prueba en este orden:
 
-## La estrategia mental
+1. **¿Hay una API por detrás?** → datos JSON limpios, lo mejor.
+2. **¿El HTML es estático?** → rápido y sencillo.
+3. **¿Solo se ve con JavaScript?** → saca el navegador.
+4. **¿Son muchas páginas?** → crawling con paginación.
+5. **¿Está detrás de login?** → sesión autenticada.
 
-Ante un sitio nuevo, prueba en este orden (de más limpio a más costoso):
-
-1. **¿Hay una API por detrás?** (técnica 3) → datos JSON limpios, lo mejor.
-2. **¿El HTML es estático?** (técnica 1) → rápido y sencillo.
-3. **¿Solo se ve con JavaScript?** (técnica 2) → saca el navegador.
-4. **¿Son miles de páginas?** (técnica 4) → Scrapy.
-5. **¿Está detrás de login?** (técnica 5) → sesión autenticada.
-
-## Archivos
-
-| Archivo | Técnica | Sitio | Genera |
-|---|---|---|---|
-| `01_estatico_bs4.py` | 1. HTML estático (requests + BeautifulSoup) | books.toscrape.com | `libros.csv` |
-| `02_dinamico_playwright.py` | 2. JS dinámico (Playwright) | quotes.toscrape.com/js | `frases.json` |
-| `03_api_red.py` | 3. API interceptada | quotes.toscrape.com/api | `frases_api.json` |
-| `04_scrapy_spider.py` | 4. Scrapy a escala | quotes.toscrape.com | `frases_scrapy.json` |
-| `05_api_con_login.py` | 5. API con login/sesión | quotes.toscrape.com/login | (consola) |
-| `extra_captcha.py` | Manejo de CAPTCHAs | (notas + ejemplos) | — |
-| `extra_html_a_markdown.py` | HTML→Markdown (ahorro de tokens) | quotes.toscrape.com | `pagina.md` |
-
-## Instalación
-
-```bash
-cd /Users/array101/scrapping
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-playwright install chromium   # solo para la técnica 2
-```
-
-## Cómo aprender con esto
-
-1. Corre `03_api_red.py` y luego `02_dinamico_playwright.py`: misma data,
-   compara la velocidad. Entenderás por qué buscar la API primero.
-2. Corre `01_estatico_bs4.py` para el caso clásico estático.
-3. Corre `04_scrapy_spider.py` para ver el crawling a escala.
-4. Corre `05_api_con_login.py` para el patrón de sesión + token CSRF
-   (es el patrón que aplicarías a tu dashboard de Kapso).
-5. Lee `extra_captcha.py` y corre `extra_html_a_markdown.py`.
+`bot.fetch(url, strategy="auto")` aplica esto solo: prueba estático y, si la
+página viene casi vacía (típico de SPAs), reintenta con navegador.
 
 ## Nota ética
 
-Practica en sitios hechos para ello (`toscrape.com`) o en tus propios sistemas.
-Respeta `robots.txt` y los Términos de Servicio. No abuses del rate limit.
+Respeta `robots.txt` y los Términos de Servicio de cada sitio, y no abuses del
+rate limit (usa `delay`). Scrapea sitios hechos para ello o tus propios sistemas.
+
+## Licencia
+
+MIT
