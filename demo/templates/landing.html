@@ -51,6 +51,10 @@
   .gh-ico { display: block; }
   .gh-stars { font-weight: 600; color: var(--text); }
   .navlinks a:hover { color: var(--text); }
+  .lang-sw { display: inline-flex; gap: 2px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .lang-btn { background: none; border: none; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); padding: 3px 7px; border-radius: 6px; cursor: pointer; }
+  .lang-btn:hover { color: var(--text); }
+  .lang-btn.active { background: var(--text); color: #fff; }
 
   /* HERO */
   .hero { text-align: center; padding: 90px 0 60px; position: relative; overflow: hidden; }
@@ -156,7 +160,8 @@
   <div class="wrap row">
     <a class="logo" href="/"><img src="{{ url_for('static', filename='logo.svg') }}" alt="" class="logo-mark">ByteCraw</a>
     <div class="navlinks">
-      <a href="/docs">Docs</a><a href="/methods">Methods</a><a href="/try">Try</a><a class="gh-link" href="https://github.com/abrahamperz/ByteCraw" target="_blank" rel="noopener"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-stars">0</span></a>
+      <a href="/docs" data-i18n="nav_docs">Docs</a><a href="/methods" data-i18n="nav_methods">Methods</a><a href="/try" data-i18n="nav_try">Try</a><a class="gh-link" href="https://github.com/abrahamperz/ByteCraw" target="_blank" rel="noopener"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-stars">0</span></a>
+      <span class="lang-sw"><button class="lang-btn" data-lang="en">EN</button><button class="lang-btn" data-lang="es">ES</button><button class="lang-btn" data-lang="pt">PT</button></span>
     </div>
   </div>
 </nav>
@@ -164,19 +169,19 @@
 <header class="hero">
   <div class="wrap">
     <div class="toggle">
-      <button class="seg active" data-mode="humans">For humans</button>
-      <button class="seg" data-mode="agents">For agents</button>
+      <button class="seg active" data-mode="humans" data-i18n="hero_humans">For humans</button>
+      <button class="seg" data-mode="agents" data-i18n="hero_agents">For agents</button>
     </div>
-    <h1>Universal <span class="grad">scraping layer</span></h1>
-    <p class="sub">A unified Python SDK for scraping any website—static HTML, dynamic JS,
+    <h1 data-i18n-html="hero_h1">Universal <span class="grad">scraping layer</span></h1>
+    <p class="sub" data-i18n="hero_sub">A unified Python SDK for scraping any website—static HTML, dynamic JS,
       hidden APIs, and LLM-ready Markdown output, all behind one type-safe API.</p>
     <div class="cta">
-      <a class="btn btn-primary" href="#start">Get started</a>
-      <a class="btn btn-ghost" href="/try">Try it live</a>
+      <a class="btn btn-primary" href="#start" data-i18n="cta_get_started">Get started</a>
+      <a class="btn btn-ghost" href="/try" data-i18n="cta_try_live">Try it live</a>
     </div>
     <div class="install">
       <span id="install-cmd"><span class="pmt">$</span> python3 -m pip install bytecraw</span>
-      <span class="copy">copy</span>
+      <span class="copy" data-i18n="copy">copy</span>
     </div>
 
     <div class="demo">
@@ -218,33 +223,33 @@ books = bot.<span class="f">crawl</span>(
     </div>
 
     <div class="stats">
-      <div class="stat"><div class="num">6.5×</div><div class="lbl">Fewer LLM tokens</div></div>
-      <div class="stat"><div class="num">MD</div><div class="lbl">From any page</div></div>
-      <div class="stat"><div class="num">1</div><div class="lbl">Unified API</div></div>
-      <div class="stat"><div class="num">0</div><div class="lbl">Config to start</div></div>
+      <div class="stat"><div class="num">6.5×</div><div class="lbl" data-i18n="stat1">Fewer LLM tokens</div></div>
+      <div class="stat"><div class="num">MD</div><div class="lbl" data-i18n="stat2">From any page</div></div>
+      <div class="stat"><div class="num">1</div><div class="lbl" data-i18n="stat3">Unified API</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl" data-i18n="stat4">Config to start</div></div>
     </div>
   </div>
 </header>
 
 <section>
   <div class="wrap">
-    <div class="eyebrow">The strategy-agnostic toolkit</div>
-    <h2>One API. Every scraping strategy.</h2>
-    <p class="lead">From a single static page to a JS-heavy SPA to a hidden JSON API—ByteCraw
+    <div class="eyebrow" data-i18n="sec1_eyebrow">The strategy-agnostic toolkit</div>
+    <h2 data-i18n="sec1_h2">One API. Every scraping strategy.</h2>
+    <p class="lead" data-i18n="sec1_lead">From a single static page to a JS-heavy SPA to a hidden JSON API—ByteCraw
       picks the right tool, or you choose explicitly.</p>
 
     <div class="features">
       <div class="feat">
-        <h3>Auto-strategy</h3>
-        <p>Tries static HTML first, falls back to a real browser when a page is JS-rendered. No guessing.</p>
+        <h3 data-i18n="feat1_t">Auto-strategy</h3>
+        <p data-i18n="feat1_p">Tries static HTML first, falls back to a real browser when a page is JS-rendered. No guessing.</p>
       </div>
       <div class="feat">
-        <h3>API-first</h3>
-        <p>Hit the JSON API behind a site and skip HTML entirely. Up to 2.5× faster than a headless browser.</p>
+        <h3 data-i18n="feat2_t">API-first</h3>
+        <p data-i18n="feat2_p">Hit the JSON API behind a site and skip HTML entirely. Up to 2.5× faster than a headless browser.</p>
       </div>
       <div class="feat">
-        <h3>LLM-ready</h3>
-        <p>Convert any page to clean Markdown with one call. Strips noise, slashes token cost for agents.</p>
+        <h3 data-i18n="feat3_t">LLM-ready</h3>
+        <p data-i18n="feat3_p">Convert any page to clean Markdown with one call. Strips noise, slashes token cost for agents.</p>
       </div>
     </div>
 
@@ -279,35 +284,36 @@ md = page.<span class="f">markdown</span>()</code></pre>
 
 <section id="eco" style="background:var(--panel-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
   <div class="wrap">
-    <div class="eyebrow">Powered by the best</div>
-    <h2>Scale with confidence</h2>
-    <p class="lead">ByteCraw stands on a battle-tested ecosystem—each strategy backed by a proven engine.</p>
+    <div class="eyebrow" data-i18n="sec2_eyebrow">Powered by the best</div>
+    <h2 data-i18n="sec2_h2">Scale with confidence</h2>
+    <p class="lead" data-i18n="sec2_lead">ByteCraw stands on a battle-tested ecosystem—each strategy backed by a proven engine.</p>
     <div class="eco">
-      <div class="card"><div class="nm">BeautifulSoup</div><div class="ds">Robust HTML parsing and CSS selectors for static pages.</div><span class="pip">strategy · static</span></div>
-      <div class="card"><div class="nm">Playwright</div><div class="ds">Real Chromium for JS-heavy SPAs and interaction.</div><span class="pip">strategy · browser</span></div>
-      <div class="card"><div class="nm">Scrapy</div><div class="ds">Industrial crawling: queues, concurrency, retries.</div><span class="pip">strategy · crawl</span></div>
-      <div class="card"><div class="nm">Trafilatura</div><div class="ds">Main-content extraction to token-light Markdown.</div><span class="pip">strategy · llm</span></div>
+      <div class="card"><div class="nm">BeautifulSoup</div><div class="ds" data-i18n="eco1_d">Robust HTML parsing and CSS selectors for static pages.</div><span class="pip">strategy · static</span></div>
+      <div class="card"><div class="nm">Playwright</div><div class="ds" data-i18n="eco2_d">Real Chromium for JS-heavy SPAs and interaction.</div><span class="pip">strategy · browser</span></div>
+      <div class="card"><div class="nm">Scrapy</div><div class="ds" data-i18n="eco3_d">Industrial crawling: queues, concurrency, retries.</div><span class="pip">strategy · crawl</span></div>
+      <div class="card"><div class="nm">Trafilatura</div><div class="ds" data-i18n="eco4_d">Main-content extraction to token-light Markdown.</div><span class="pip">strategy · llm</span></div>
     </div>
   </div>
 </section>
 
 <div class="footcta" id="start">
   <div class="wrap">
-    <h2>Build with ByteCraw today</h2>
-    <p class="lead">Start by exploring the docs, or open the live dashboard to run every strategy.</p>
+    <h2 data-i18n="foot_h2">Build with ByteCraw today</h2>
+    <p class="lead" data-i18n="foot_lead">Start by exploring the docs, or open the live dashboard to run every strategy.</p>
     <div class="cta">
-      <a class="btn btn-primary" href="/methods">Open methods</a>
-      <a class="btn btn-ghost" href="#">Read the docs</a>
+      <a class="btn btn-primary" href="/methods" data-i18n="cta_open_methods">Open methods</a>
+      <a class="btn btn-ghost" href="/docs" data-i18n="cta_read_docs">Read the docs</a>
     </div>
-    <div class="install" style="margin-top:18px"><span><span class="pmt">$</span> python3 -m pip install bytecraw</span><span class="copy">copy</span></div>
-    <div class="install" style="margin-top:10px"><span><span class="pmt">$</span> python3 -m playwright install chromium</span><span class="copy">copy</span></div>
+    <div class="install" style="margin-top:18px"><span><span class="pmt">$</span> python3 -m pip install bytecraw</span><span class="copy" data-i18n="copy">copy</span></div>
+    <div class="install" style="margin-top:10px"><span><span class="pmt">$</span> python3 -m playwright install chromium</span><span class="copy" data-i18n="copy">copy</span></div>
   </div>
 </div>
 
 <footer>
-  <div class="wrap">ByteCraw — universal scraping layer · built for practice · MIT</div>
+  <div class="wrap">ByteCraw — universal scraping layer · MIT</div>
 </footer>
 
+<script src="{{ url_for('static', filename='i18n.js') }}"></script>
 <script>
   const cmds = {
     humans: '<span class="pmt">$</span> python3 -m pip install bytecraw',

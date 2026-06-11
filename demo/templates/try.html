@@ -44,6 +44,10 @@
   .gh-stars { font-weight: 600; color: var(--text); }
   .navlinks a:hover { color: var(--text); }
   .navlinks a.active { color: var(--text); font-weight: 600; }
+  .lang-sw { display: inline-flex; gap: 2px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .lang-btn { background: none; border: none; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); padding: 3px 7px; border-radius: 6px; cursor: pointer; }
+  .lang-btn:hover { color: var(--text); }
+  .lang-btn.active { background: var(--text); color: #fff; }
 
   /* HEADER */
   header.head { text-align: center; padding: 70px 0 40px; position: relative; overflow: hidden; }
@@ -117,56 +121,58 @@
   <div class="wrap row">
     <a class="logo" href="/"><img src="{{ url_for('static', filename='logo.svg') }}" alt="" class="logo-mark">ByteCraw</a>
     <div class="navlinks">
-      <a href="/docs">Docs</a><a href="/methods">Methods</a><a class="active" href="/try">Try</a><a class="gh-link" href="https://github.com/abrahamperz/ByteCraw" target="_blank" rel="noopener"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-stars">0</span></a>
+      <a href="/docs" data-i18n="nav_docs">Docs</a><a href="/methods" data-i18n="nav_methods">Methods</a><a class="active" href="/try" data-i18n="nav_try">Try</a><a class="gh-link" href="https://github.com/abrahamperz/ByteCraw" target="_blank" rel="noopener"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-stars">0</span></a>
+      <span class="lang-sw"><button class="lang-btn" data-lang="en">EN</button><button class="lang-btn" data-lang="es">ES</button><button class="lang-btn" data-lang="pt">PT</button></span>
     </div>
   </div>
 </nav>
 
 <header class="head">
   <div class="wrap">
-    <div class="eyebrow">Interactive playground</div>
-    <h1>Try it with any URL</h1>
-    <p class="sub">Paste a page and ByteCraw picks the strategy, scrapes it, and explains
+    <div class="eyebrow" data-i18n="try_eyebrow">Interactive playground</div>
+    <h1 data-i18n="try_h1">Try it with any URL</h1>
+    <p class="sub" data-i18n="try_sub">Paste a page and ByteCraw picks the strategy, scrapes it, and explains
       what it did and why.</p>
   </div>
 </header>
 
 <div class="wrap">
   <div class="analyzer">
-    <h2 class="azr-title">Analyze any URL</h2>
-    <p class="azr-sub">Paste a page: ByteCraw picks the strategy (static or browser) and explains what it did and why.</p>
+    <h2 class="azr-title" data-i18n="azr_title">Analyze any URL</h2>
+    <p class="azr-sub" data-i18n="azr_sub">Paste a page: ByteCraw picks the strategy (static or browser) and explains what it did and why.</p>
     <div class="azr-bar">
       <input id="azr-url" class="azr-input" type="text" placeholder="https://books.toscrape.com"
              onkeydown="if(event.key==='Enter')analyze()">
-      <button id="azr-btn" class="btn" onclick="analyze()">Analyze</button>
+      <button id="azr-btn" class="btn" onclick="analyze()" data-i18n="analyze_btn">Analyze</button>
     </div>
     <div id="azr-status" class="status"></div>
     <div id="azr-out" class="azr-out"></div>
   </div>
 </div>
 
-<footer><div class="wrap">ByteCraw — universal scraping layer · built for practice · MIT</div></footer>
+<footer><div class="wrap">ByteCraw — universal scraping layer · MIT</div></footer>
 
+<script src="{{ url_for('static', filename='i18n.js') }}"></script>
 <script>
 async function analyze() {
   const url = document.getElementById("azr-url").value.trim();
   const btn = document.getElementById("azr-btn");
   const status = document.getElementById("azr-status");
   const out = document.getElementById("azr-out");
-  if (!url) { status.className = "status err"; status.textContent = "✗ Enter a URL"; return; }
+  if (!url) { status.className = "status err"; status.textContent = t("st_enter_url"); return; }
   btn.disabled = true;
-  status.className = "status run"; status.textContent = "⏳ Analyzing the page...";
+  status.className = "status run"; status.textContent = t("st_analyzing");
   out.className = "azr-out"; out.innerHTML = "";
   try {
     const r = await fetch("/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, lang: currentLang() }),
     });
     const j = await r.json();
     if (!j.ok) { status.className = "status err"; status.textContent = "✗ " + (j.error || "Error"); return; }
     status.className = "status ok";
-    status.innerHTML = `✓ Strategy used: <span class="time">${j.method}</span>`;
+    status.innerHTML = `✓ ${t("st_strategy")} <span class="time">${j.method}</span>`;
     renderAnalysis(j);
   } catch (e) {
     status.className = "status err"; status.textContent = "✗ " + e;
@@ -181,17 +187,17 @@ function renderAnalysis(j) {
   const tokens = j.tokens_md != null
     ? `<span class="badge">tokens HTML→Markdown: <b>${j.tokens_html} → ${j.tokens_md}</b></span>` : "";
   const meta = `<div class="azr-meta">
-    <span class="badge">title: <b>${escapeHtml(j.titulo)}</b></span>
-    <span class="badge">links: <b>${j.links}</b></span>
+    <span class="badge">${t("badge_title")}: <b>${escapeHtml(j.titulo)}</b></span>
+    <span class="badge">${t("badge_links")}: <b>${j.links}</b></span>
     ${tokens}
   </div>`;
   const sample = j.sample_md
     ? `<div class="count-row">
-         <div class="count">Extracted Markdown · ready for an LLM</div>
-         <button class="dl" onclick="downloadMd()">↓ Download .md</button>
+         <div class="count">${t("md_ready")}</div>
+         <button class="dl" onclick="downloadMd()">${t("md_download")}</button>
        </div><pre>${escapeHtml(j.sample_md)}</pre>`
     : "";
-  const why = `<div class="azr-why"><b>Why did it do that?</b>${escapeHtml(j.why)}</div>`;
+  const why = `<div class="azr-why"><b>${t("why_q")}</b>${escapeHtml(j.why)}</div>`;
   out.innerHTML = `<div class="azr-steps">${steps}</div>${meta}${sample}${why}`;
   out.className = "azr-out show";
   _md = j.sample_md || "";
