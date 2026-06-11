@@ -7,6 +7,22 @@ APIs ocultas, login con sesión, crawling y Markdown listo para LLMs.
 - **PyPI**: https://pypi.org/project/bytecraw/
 - **GitHub**: https://github.com/abrahamperz/ByteCraw
 
+## Índice
+
+- [Instalación](#instalación)
+- [Quickstart](#quickstart)
+- [Las técnicas](#las-técnicas)
+  - [1 · HTML estático](#1--html-estático)
+  - [2 · JS dinámico (navegador)](#2--js-dinámico-navegador)
+  - [3 · API oculta (JSON)](#3--api-oculta-json)
+  - [4 · Crawling con paginación](#4--crawling-con-paginación)
+  - [5 · Login con sesión (CSRF / bearer)](#5--login-con-sesión-csrf--bearer)
+  - [6 · Crawling de grafos (avanzado)](#6--crawling-de-grafos-avanzado)
+  - [Markdown para LLMs](#markdown-para-llms)
+- [Estrategia mental](#estrategia-mental)
+- [Nota ética](#nota-ética)
+- [Licencia](#licencia)
+
 ## Instalación
 
 ```bash
