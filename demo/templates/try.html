@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -125,20 +125,20 @@
 <header class="head">
   <div class="wrap">
     <div class="eyebrow">Interactive playground</div>
-    <h1>Pruébalo con cualquier URL</h1>
-    <p class="sub">Pega una página y ByteCraw elige la estrategia, la scrapea y te explica
-      qué hizo y por qué.</p>
+    <h1>Try it with any URL</h1>
+    <p class="sub">Paste a page and ByteCraw picks the strategy, scrapes it, and explains
+      what it did and why.</p>
   </div>
 </header>
 
 <div class="wrap">
   <div class="analyzer">
-    <h2 class="azr-title">Analiza cualquier URL</h2>
-    <p class="azr-sub">Pega una página: ByteCraw elige la estrategia (estático o navegador) y te explica qué hizo y por qué.</p>
+    <h2 class="azr-title">Analyze any URL</h2>
+    <p class="azr-sub">Paste a page: ByteCraw picks the strategy (static or browser) and explains what it did and why.</p>
     <div class="azr-bar">
       <input id="azr-url" class="azr-input" type="text" placeholder="https://books.toscrape.com"
              onkeydown="if(event.key==='Enter')analyze()">
-      <button id="azr-btn" class="btn" onclick="analyze()">Analizar</button>
+      <button id="azr-btn" class="btn" onclick="analyze()">Analyze</button>
     </div>
     <div id="azr-status" class="status"></div>
     <div id="azr-out" class="azr-out"></div>
@@ -153,9 +153,9 @@ async function analyze() {
   const btn = document.getElementById("azr-btn");
   const status = document.getElementById("azr-status");
   const out = document.getElementById("azr-out");
-  if (!url) { status.className = "status err"; status.textContent = "✗ Escribe una URL"; return; }
+  if (!url) { status.className = "status err"; status.textContent = "✗ Enter a URL"; return; }
   btn.disabled = true;
-  status.className = "status run"; status.textContent = "⏳ Analizando la página...";
+  status.className = "status run"; status.textContent = "⏳ Analyzing the page...";
   out.className = "azr-out"; out.innerHTML = "";
   try {
     const r = await fetch("/analyze", {
@@ -166,7 +166,7 @@ async function analyze() {
     const j = await r.json();
     if (!j.ok) { status.className = "status err"; status.textContent = "✗ " + (j.error || "Error"); return; }
     status.className = "status ok";
-    status.innerHTML = `✓ Estrategia usada: <span class="time">${j.method}</span>`;
+    status.innerHTML = `✓ Strategy used: <span class="time">${j.method}</span>`;
     renderAnalysis(j);
   } catch (e) {
     status.className = "status err"; status.textContent = "✗ " + e;
@@ -181,17 +181,17 @@ function renderAnalysis(j) {
   const tokens = j.tokens_md != null
     ? `<span class="badge">tokens HTML→Markdown: <b>${j.tokens_html} → ${j.tokens_md}</b></span>` : "";
   const meta = `<div class="azr-meta">
-    <span class="badge">título: <b>${escapeHtml(j.titulo)}</b></span>
-    <span class="badge">enlaces: <b>${j.links}</b></span>
+    <span class="badge">title: <b>${escapeHtml(j.titulo)}</b></span>
+    <span class="badge">links: <b>${j.links}</b></span>
     ${tokens}
   </div>`;
   const sample = j.sample_md
     ? `<div class="count-row">
-         <div class="count">Markdown extraído · listo para un LLM</div>
-         <button class="dl" onclick="downloadMd()">↓ Descargar .md</button>
+         <div class="count">Extracted Markdown · ready for an LLM</div>
+         <button class="dl" onclick="downloadMd()">↓ Download .md</button>
        </div><pre>${escapeHtml(j.sample_md)}</pre>`
     : "";
-  const why = `<div class="azr-why"><b>¿Por qué hizo eso?</b>${escapeHtml(j.why)}</div>`;
+  const why = `<div class="azr-why"><b>Why did it do that?</b>${escapeHtml(j.why)}</div>`;
   out.innerHTML = `<div class="azr-steps">${steps}</div>${meta}${sample}${why}`;
   out.className = "azr-out show";
   _md = j.sample_md || "";

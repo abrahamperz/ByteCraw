@@ -112,21 +112,21 @@ def analyze():
     """Corre la estrategia 'auto' sobre una URL y explica qué hizo y por qué."""
     url = (request.json or {}).get("url", "").strip()
     if not url.startswith(("http://", "https://")):
-        return jsonify({"ok": False, "error": "Pon una URL que empiece con http:// o https://"}), 400
+        return jsonify({"ok": False, "error": "Enter a URL that starts with http:// or https://"}), 400
 
     bot = Scraper(timeout=20)
     pasos = []
     try:
         page = bot.static(url)
     except Exception as e:
-        return jsonify({"ok": False, "error": f"No pude descargar la página: {e}"})
+        return jsonify({"ok": False, "error": f"Could not download the page: {e}"})
 
     texto = page.soup.get_text(strip=True)
     largo = len(texto)
     pasos.append({
-        "titulo": "1 · Probé HTML estático",
-        "detalle": f"Pedí la página con requests (sin navegador). Status {page.status}, "
-                   f"{page.elapsed}s, {largo} caracteres de texto visible.",
+        "titulo": "1 · Tried static HTML",
+        "detalle": f"Fetched the page with requests (no browser). Status {page.status}, "
+                   f"{page.elapsed}s, {largo} characters of visible text.",
     })
 
     uso_navegador = False
@@ -136,28 +136,28 @@ def analyze():
             page = bot.browser(url)
             uso_navegador = True
             pasos.append({
-                "titulo": "2 · Cambié a navegador real",
-                "detalle": f"El HTML venía casi vacío, así que abrí Chromium (Playwright) y leí "
-                           f"el DOM ya pintado por el JavaScript. {page.elapsed}s.",
+                "titulo": "2 · Switched to a real browser",
+                "detalle": f"The HTML came back nearly empty, so I launched Chromium (Playwright) "
+                           f"and read the DOM already rendered by JavaScript. {page.elapsed}s.",
             })
         except ImportError:
             falta_chromium = True
             pasos.append({
-                "titulo": "2 · Quería usar un navegador",
-                "detalle": "El HTML venía casi vacío (típico de una SPA), pero Chromium no está "
-                           "instalado. Corre 'playwright install chromium' para activar este paso.",
+                "titulo": "2 · Wanted to use a browser",
+                "detalle": "The HTML came back nearly empty (typical of an SPA), but Chromium isn't "
+                           "installed. Run 'playwright install chromium' to enable this step.",
             })
 
     if uso_navegador:
-        porque = ("El HTML estático traía menos de 200 caracteres de texto: señal típica de una "
-                  "página que se rellena con JavaScript. Por eso descarté la vía rápida y abrí un "
-                  "navegador real para ver el contenido final.")
+        porque = ("The static HTML had fewer than 200 characters of text: a typical sign of a page "
+                  "that fills itself with JavaScript. So I dropped the fast path and opened a real "
+                  "browser to see the final content.")
     elif falta_chromium:
-        porque = ("La página parece necesitar JavaScript, pero falta Chromium. Aun así te muestro "
-                  "lo que sí llegó por HTML estático.")
+        porque = ("The page seems to need JavaScript, but Chromium is missing. I'm still showing "
+                  "what did come through via static HTML.")
     else:
-        porque = ("El HTML estático ya traía todo el contenido, así que no hizo falta un navegador. "
-                  "Es la vía más rápida y barata: una sola petición HTTP, sin abrir Chromium.")
+        porque = ("The static HTML already had all the content, so no browser was needed. It's the "
+                  "fastest, cheapest path: a single HTTP request, no Chromium.")
 
     md = ""
     tok_md = None
@@ -173,7 +173,7 @@ def analyze():
         "method": page.method,
         "steps": pasos,
         "why": porque,
-        "titulo": page.css("title") or "(sin título)",
+        "titulo": page.css("title") or "(no title)",
         "links": len(page.links()),
         "tokens_html": page.tokens(),
         "tokens_md": tok_md,
