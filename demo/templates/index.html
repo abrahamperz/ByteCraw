@@ -96,6 +96,28 @@
   .tag { display: inline-block; background: var(--panel-2); color: var(--muted); font-size: 10px; padding: 1px 6px; border-radius: 4px; margin: 1px; border: 1px solid var(--border); }
   footer { border-top: 1px solid var(--border); padding: 30px 0; color: var(--muted); font-size: 13px; text-align: center; }
 
+  /* ADVANCED METHODS */
+  .adv { border-top: 1px solid var(--border); padding: 50px 0 80px; }
+  .adv .eyebrow { text-align: left; }
+  .adv h2 { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+  .adv .desc { color: var(--muted); font-size: 14.5px; max-width: 640px; margin-bottom: 22px; line-height: 1.6; }
+  .adv-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .adv-form input { flex: 1; min-width: 220px; background: var(--panel); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: 14px; font-family: var(--mono); color: var(--text); }
+  .adv-form input:focus { outline: none; border-color: var(--border-2); }
+  .adv-form input.q { flex: 0 1 240px; }
+  .adv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 14px; }
+  .adv-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .adv-card h3 { font-size: 14px; font-family: var(--mono); margin-bottom: 2px; }
+  .adv-card .what { font-size: 12px; color: var(--muted); margin-bottom: 10px; min-height: 32px; }
+  .adv-card .nums { font-family: var(--mono); font-size: 12px; color: var(--muted-2); display: flex; flex-direction: column; gap: 3px; }
+  .adv-card .nums b { color: var(--text); }
+  .adv-card ol { margin: 10px 0 0 16px; font-size: 11.5px; color: var(--muted-2); }
+  .adv-card ol li { margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adv-card .rel { color: var(--amber); font-weight: 700; font-family: var(--mono); font-size: 10.5px; }
+  .adv-card.winner { border-color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+  .adv-pr { margin-top: 18px; font-size: 12.5px; color: var(--muted); }
+  .adv-pr code { font-family: var(--mono); font-size: 11.5px; color: var(--muted-2); }
+
   @media (max-width: 820px) { h1 { font-size: 32px; } .grid { grid-template-columns: 1fr; } .navlinks { display: none; } }
 </style>
 </head>
@@ -147,8 +169,94 @@
   </div>
 </div>
 
+<section class="adv" id="advanced">
+  <div class="wrap">
+    <div class="eyebrow" data-i18n="adv_eyebrow">Advanced methods</div>
+    <h2 data-i18n="adv_h2">Graph crawling: BFS vs Shark-Search vs OPIC</h2>
+    <p class="desc" data-i18n="adv_desc">The web is a graph. A crawler decides which URL to visit next with a limited request budget. BFS sweeps by levels, Shark-Search chases a topic (best-first with inherited scores), OPIC computes page importance online like a live PageRank. Same loop, different ordering — run all three on a site and compare.</p>
+    <div class="adv-form">
+      <input id="adv-url" type="url" value="https://quotes.toscrape.com" placeholder="https://...">
+      <input id="adv-query" class="q" type="text" value="love life books" data-i18n-ph="adv_query_ph" placeholder="topic query (for Shark-Search)">
+      <button class="btn" id="adv-run" data-i18n="adv_run">Run comparison</button>
+    </div>
+    <div class="status" id="adv-status"></div>
+    <div class="adv-grid" id="adv-grid"></div>
+    <div class="adv-pr" id="adv-pr"></div>
+  </div>
+</section>
+
 <footer><div class="wrap">ByteCraw — universal scraping layer · MIT</div></footer>
 <script src="{{ url_for('static', filename='i18n.js') }}"></script>
+<script>
+const ADV = {
+  bfs:   { title: "BFS",          whatKey: "adv_what_bfs" },
+  shark: { title: "Shark-Search", whatKey: "adv_what_shark" },
+  opic:  { title: "OPIC",         whatKey: "adv_what_opic" },
+};
+
+document.getElementById("adv-run").addEventListener("click", runComparison);
+
+async function runComparison() {
+  const url = document.getElementById("adv-url").value.trim();
+  const query = document.getElementById("adv-query").value.trim();
+  const btn = document.getElementById("adv-run");
+  const status = document.getElementById("adv-status");
+  const grid = document.getElementById("adv-grid");
+  const prBox = document.getElementById("adv-pr");
+  if (!url) return;
+  btn.disabled = true;
+  grid.innerHTML = ""; prBox.innerHTML = "";
+  const results = {};
+  try {
+    for (const strat of ["bfs", "shark", "opic"]) {
+      status.className = "status run";
+      status.textContent = `${t("adv_running")} ${ADV[strat].title}…`;
+      const r = await fetch("/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, query, strategy: strat }),
+      });
+      const j = await r.json();
+      if (!j.ok) { status.className = "status err"; status.textContent = "✗ " + (j.error || "Error"); btn.disabled = false; return; }
+      results[strat] = j;
+      renderCards(results);
+    }
+    status.className = "status ok";
+    status.textContent = "✓ " + t("adv_done");
+    renderPagerank(results.opic);
+  } catch (e) {
+    status.className = "status err"; status.textContent = "✗ " + e;
+  } finally { btn.disabled = false; }
+}
+
+function renderCards(results) {
+  const grid = document.getElementById("adv-grid");
+  const best = Object.entries(results).sort(
+    (a, b) => b[1].stats.avg_relevance - a[1].stats.avg_relevance)[0]?.[0];
+  grid.innerHTML = Object.entries(results).map(([strat, j]) => `
+    <div class="adv-card${strat === best && Object.keys(results).length === 3 ? " winner" : ""}">
+      <h3>${ADV[strat].title}${strat === best && Object.keys(results).length === 3 ? " 🏆" : ""}</h3>
+      <div class="what">${t(ADV[strat].whatKey)}</div>
+      <div class="nums">
+        <span>${t("adv_pages")}: <b>${j.stats.requests}</b> · ${t("adv_time")}: <b>${j.stats.elapsed}s</b></span>
+        <span>${t("adv_avgrel")}: <b>${j.stats.avg_relevance}</b> · ${t("adv_relevant")}: <b>${j.stats.relevant_found ?? "—"}</b></span>
+      </div>
+      <ol>${j.pages.slice(0, 5).map(p =>
+        `<li title="${esc(p.url)}"><span class="rel">${p.relevance.toFixed(2)}</span> ${esc(short(p.url))}</li>`).join("")}
+      </ol>
+    </div>`).join("");
+}
+
+function renderPagerank(j) {
+  if (!j || !j.pagerank?.length) return;
+  document.getElementById("adv-pr").innerHTML =
+    `<strong>${t("adv_pr")}</strong> ` +
+    j.pagerank.map(p => `<code>${esc(short(p.url))} (${p.score})</code>`).join(" · ");
+}
+
+function short(u) { try { const x = new URL(u); return (x.pathname === "/" ? x.hostname : x.pathname).slice(0, 48); } catch { return u.slice(0, 48); } }
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+</script>
 <script>
 fetch('https://api.github.com/repos/abrahamperz/ByteCraw').then(r=>r.json()).then(d=>{
   if(typeof d.stargazers_count!=='number')return;

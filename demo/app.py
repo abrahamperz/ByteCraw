@@ -24,6 +24,7 @@ EXAMPLES = BASE.parent / "examples"
 
 sys.path.insert(0, str(BASE.parent))
 from bytecraw import Scraper
+from bytecraw.crawler import BFS, OPIC, SharkSearch, pagerank
 
 load_dotenv()
 
@@ -292,6 +293,51 @@ def analyze():
         "tokens_html": page.tokens(),
         "tokens_md": tok_md,
         "sample_md": md,
+    })
+
+
+CRAWL_STRATEGIES = {"bfs": BFS, "shark": SharkSearch, "opic": OPIC}
+
+
+@app.route("/crawl", methods=["POST"])
+def crawl():
+    """Corre UNA estrategia de crawling (el front compara llamando 3 veces).
+
+    Límites apretados (6 páginas, timeouts cortos) para caber en la ventana
+    de ~10s de una función serverless de Vercel.
+    """
+    body = request.json or {}
+    url = body.get("url", "").strip()
+    strategy = body.get("strategy", "bfs")
+    query = body.get("query", "").strip()
+
+    if not url.startswith(("http://", "https://")):
+        return jsonify({"ok": False, "error": "URL must start with http:// or https://"}), 400
+    if strategy not in CRAWL_STRATEGIES:
+        return jsonify({"ok": False, "error": "unknown strategy"}), 400
+
+    try:
+        crawler = CRAWL_STRATEGIES[strategy](query=query, delay=0.05, timeout=6)
+        result = crawler.crawl(url, max_pages=6, max_depth=4)
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"crawl failed: {e}"})
+
+    pr = pagerank(result.graph)
+    try:
+        posthog_client.capture(
+            _get_distinct_id(),
+            "crawl_strategy_run",
+            properties={"strategy": strategy, **result.stats},
+        )
+    except Exception:
+        pass
+
+    return jsonify({
+        "ok": True,
+        "strategy": strategy,
+        "pages": result.pages,
+        "stats": result.stats,
+        "pagerank": [{"url": u, "score": round(s, 4)} for u, s in list(pr.items())[:5]],
     })
 
 
