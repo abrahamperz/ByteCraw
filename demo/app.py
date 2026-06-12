@@ -301,10 +301,10 @@ CRAWL_STRATEGIES = {"bfs": BFS, "shark": SharkSearch, "opic": OPIC}
 
 @app.route("/crawl", methods=["POST"])
 def crawl():
-    """Runs ONE crawl strategy (the frontend compares by calling 3 times).
+    """Runs ONE crawl strategy (the frontend compares by calling 3 in parallel).
 
-    Tight limits (6 pages, short timeouts) to fit inside the ~10s window
-    of a Vercel serverless function.
+    20 pages needs maxDuration=60 in vercel.json; no delay between requests
+    to stay well inside the window.
     """
     body = request.json or {}
     url = body.get("url", "").strip()
@@ -317,8 +317,8 @@ def crawl():
         return jsonify({"ok": False, "error": "unknown strategy"}), 400
 
     try:
-        crawler = CRAWL_STRATEGIES[strategy](query=query, delay=0.05, timeout=6)
-        result = crawler.crawl(url, max_pages=6, max_depth=4)
+        crawler = CRAWL_STRATEGIES[strategy](query=query, delay=0.0, timeout=6)
+        result = crawler.crawl(url, max_pages=20, max_depth=4)
     except Exception as e:
         return jsonify({"ok": False, "error": f"crawl failed: {e}"})
 

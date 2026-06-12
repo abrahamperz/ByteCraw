@@ -64,6 +64,11 @@ def cosine(text_a: str, text_b: str) -> float:
     return dot / norm if norm else 0.0
 
 
+def _root_domain(netloc: str) -> str:
+    """firecrawl.dev, www.firecrawl.dev and docs.firecrawl.dev are the same site."""
+    return ".".join(netloc.lower().split(":")[0].split(".")[-2:])
+
+
 def normalize(url: str, base: str) -> str | None:
     """Resolve relative URLs, strip #fragments and filter out non-web-page URLs."""
     absolute, _ = urldefrag(urljoin(base, url))
@@ -164,7 +169,7 @@ class Crawler:
         start_norm = normalize(start, start)
         if not start_norm:
             raise ValueError(f"Invalid URL: {start}")
-        domain = urlparse(start_norm).netloc
+        domain = _root_domain(urlparse(start_norm).netloc)
 
         frontier = Frontier()
         frontier.push(start_norm, self.initial_score(start_norm))
@@ -199,7 +204,7 @@ class Crawler:
                 child = normalize(a["href"], url)
                 if not child or child == url:
                     continue
-                if self.same_domain and urlparse(child).netloc != domain:
+                if self.same_domain and _root_domain(urlparse(child).netloc) != domain:
                     continue
                 links.append({"url": child, "anchor": a.get_text(" ", strip=True)})
 

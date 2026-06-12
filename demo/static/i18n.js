@@ -13,7 +13,7 @@
       adv_eyebrow: "Advanced methods",
       adv_h2: "Graph crawling: BFS vs Shark-Search vs OPIC",
       adv_desc: "The web is a graph. A crawler decides which URL to visit next with a limited request budget. BFS sweeps by levels, Shark-Search chases a topic (best-first with inherited scores), OPIC computes page importance online like a live PageRank. Same loop, different ordering — run all three on a site and compare.",
-      adv_query_ph: "topic query (for Shark-Search)",
+      adv_query_ph: "topic query",
       adv_run: "Run comparison", adv_running: "Crawling with", adv_done: "Done — higher avg relevance with the same budget wins",
       adv_pages: "pages", adv_time: "time", adv_avgrel: "avg relevance", adv_relevant: "relevant",
       adv_pr: "PageRank (offline) on the crawled graph:",
@@ -64,10 +64,15 @@
       try_sub: "Paste a page and ByteCraw picks the strategy, scrapes it, and explains what it did and why.",
       azr_title: "Analyze any URL",
       azr_sub: "Paste a page: ByteCraw picks the strategy (static or browser) and explains what it did and why.",
+      azr_hint: "Change the URL and try yours.",
       analyze_btn: "Analyze",
-      st_enter_url: "✗ Enter a URL", st_analyzing: "⏳ Analyzing the page...", st_strategy: "Strategy used:",
+      adv_disc: "discovered (request budget)", adv_download: "Download results (.json)",
+      adv_lbl_query: "Topic to chase",
+      badge_deep: "Graph analyzer",
+      badge_tokens: "Markdown saves {pct}% of LLM tokens",
+      st_enter_url: "✗ Enter a URL", st_analyzing: "Analyzing the page...", st_strategy: "Strategy used:",
       badge_title: "title", badge_links: "links",
-      md_ready: "Extracted Markdown · ready for an LLM", md_download: "↓ Download .md", why_q: "Why did it do that?",
+      md_ready: "Extracted Markdown · ready for an LLM", md_copy: "Copy .md", md_download: "↓ Download .md", why_q: "Why did it do that?",
 
       d_grp_start: "Getting started", d_grp_api: "API reference", d_grp_guides: "Guides",
       d_install: "Installation", d_quickstart: "Quickstart",
@@ -99,7 +104,7 @@
       adv_eyebrow: "Métodos avanzados",
       adv_h2: "Crawling de grafos: BFS vs Shark-Search vs OPIC",
       adv_desc: "La web es un grafo. Un crawler decide qué URL visitar después con un presupuesto limitado de requests. BFS barre por niveles, Shark-Search persigue un tema (best-first con scores heredados), OPIC calcula la importancia de cada página en vivo, como un PageRank online. Mismo loop, distinto orden: corre las tres sobre un sitio y compara.",
-      adv_query_ph: "query temático (para Shark-Search)",
+      adv_query_ph: "query temático",
       adv_run: "Correr comparación", adv_running: "Crawleando con", adv_done: "Listo — gana la mayor relevancia promedio con el mismo presupuesto",
       adv_pages: "páginas", adv_time: "tiempo", adv_avgrel: "relevancia prom.", adv_relevant: "relevantes",
       adv_pr: "PageRank (offline) sobre el grafo crawleado:",
@@ -150,10 +155,15 @@
       try_sub: "Pega una página y ByteCraw elige la estrategia, la scrapea y te explica qué hizo y por qué.",
       azr_title: "Analiza cualquier URL",
       azr_sub: "Pega una página: ByteCraw elige la estrategia (estático o navegador) y te explica qué hizo y por qué.",
+      azr_hint: "Cambia la URL y prueba la tuya.",
       analyze_btn: "Analizar",
-      st_enter_url: "✗ Escribe una URL", st_analyzing: "⏳ Analizando la página...", st_strategy: "Estrategia usada:",
+      adv_disc: "descubiertas (presupuesto de requests)", adv_download: "Descargar resultados (.json)",
+      adv_lbl_query: "Tema a perseguir",
+      badge_deep: "Analizador de grafo",
+      badge_tokens: "El Markdown ahorra {pct}% de tokens de LLM",
+      st_enter_url: "✗ Escribe una URL", st_analyzing: "Analizando la página...", st_strategy: "Estrategia usada:",
       badge_title: "título", badge_links: "enlaces",
-      md_ready: "Markdown extraído · listo para un LLM", md_download: "↓ Descargar .md", why_q: "¿Por qué hizo eso?",
+      md_ready: "Markdown extraído · listo para un LLM", md_copy: "Copiar .md", md_download: "↓ Descargar .md", why_q: "¿Por qué hizo eso?",
 
       d_grp_start: "Para empezar", d_grp_api: "Referencia de API", d_grp_guides: "Guías",
       d_install: "Instalación", d_quickstart: "Inicio rápido",
@@ -185,7 +195,7 @@
       adv_eyebrow: "Métodos avançados",
       adv_h2: "Crawling de grafos: BFS vs Shark-Search vs OPIC",
       adv_desc: "A web é um grafo. Um crawler decide qual URL visitar em seguida com um orçamento limitado de requests. BFS varre por níveis, Shark-Search persegue um tema (best-first com scores herdados), OPIC calcula a importância de cada página ao vivo, como um PageRank online. Mesmo loop, ordem diferente: rode as três em um site e compare.",
-      adv_query_ph: "query temática (para Shark-Search)",
+      adv_query_ph: "query temática",
       adv_run: "Rodar comparação", adv_running: "Crawleando com", adv_done: "Pronto — vence a maior relevância média com o mesmo orçamento",
       adv_pages: "páginas", adv_time: "tempo", adv_avgrel: "relevância média", adv_relevant: "relevantes",
       adv_pr: "PageRank (offline) sobre o grafo rastreado:",
@@ -236,10 +246,15 @@
       try_sub: "Cole uma página e o ByteCraw escolhe a estratégia, faz o scraping e explica o que fez e por quê.",
       azr_title: "Analise qualquer URL",
       azr_sub: "Cole uma página: o ByteCraw escolhe a estratégia (estático ou navegador) e explica o que fez e por quê.",
+      azr_hint: "Troque a URL e teste a sua.",
       analyze_btn: "Analisar",
-      st_enter_url: "✗ Digite uma URL", st_analyzing: "⏳ Analisando a página...", st_strategy: "Estratégia usada:",
+      adv_disc: "descobertas (orçamento de requests)", adv_download: "Baixar resultados (.json)",
+      adv_lbl_query: "Tema a perseguir",
+      badge_deep: "Analisador de grafo",
+      badge_tokens: "O Markdown economiza {pct}% dos tokens de LLM",
+      st_enter_url: "✗ Digite uma URL", st_analyzing: "Analisando a página...", st_strategy: "Estratégia usada:",
       badge_title: "título", badge_links: "links",
-      md_ready: "Markdown extraído · pronto para um LLM", md_download: "↓ Baixar .md", why_q: "Por que fez isso?",
+      md_ready: "Markdown extraído · pronto para um LLM", md_copy: "Copiar .md", md_download: "↓ Baixar .md", why_q: "Por que fez isso?",
 
       d_grp_start: "Começando", d_grp_api: "Referência da API", d_grp_guides: "Guias",
       d_install: "Instalação", d_quickstart: "Início rápido",
@@ -297,6 +312,7 @@
     document.querySelectorAll(".lang-btn").forEach(b => {
       b.classList.toggle("active", b.getAttribute("data-lang") === lang);
     });
+    document.dispatchEvent(new CustomEvent("bc:lang", { detail: lang }));
   }
 
   window.setLang = function (lang) {
