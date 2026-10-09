@@ -38,11 +38,16 @@ from mcp.server.transport_security import TransportSecuritySettings
 from . import mcp_server as local
 from .security import assert_public_url
 
-MAX_PAGES = 10  # hard cap per focused_crawl call (local allows 50)
+MAX_PAGES = 8  # hard cap per focused_crawl call (local allows 50)
 # compare_strategies is three crawls that the rate limiter charges as one
-# request, so it gets a smaller budget: 3 x 6 = 18 fetches, about two
+# request, so it gets a smaller budget: 3 x 5 = 15 fetches, about two
 # focused_crawls' worth. Same bounded-cost rule, applied to a heavier call.
-MAX_COMPARE_PAGES = 6
+MAX_COMPARE_PAGES = 5
+# Per-page HTTP timeout on the hosted server (local default is 10s). Kept
+# tight so one slow/dead page can't eat the whole function budget: worst case
+# is MAX_PAGES * HOSTED_TIMEOUT ~= 40s, inside the 45s maxDuration in
+# vercel.json. This is what keeps crawls from hitting the wall and timing out.
+HOSTED_TIMEOUT = 5
 RATE_LIMIT = 20  # requests per window per client IP
 RATE_WINDOW = 60.0  # seconds
 
@@ -176,7 +181,11 @@ def focused_crawl(
 ) -> dict:
     _guarded(url)
     return local.focused_crawl(
-        url, query=query, strategy=strategy, max_pages=min(max_pages, MAX_PAGES)
+        url,
+        query=query,
+        strategy=strategy,
+        max_pages=min(max_pages, MAX_PAGES),
+        timeout=HOSTED_TIMEOUT,
     )
 
 
@@ -190,7 +199,9 @@ def focused_crawl(
 )
 def compare_strategies(url: str, query: str, max_pages: int = MAX_COMPARE_PAGES) -> dict:
     _guarded(url)
-    return local.compare_strategies(url, query=query, max_pages=min(max_pages, MAX_COMPARE_PAGES))
+    return local.compare_strategies(
+        url, query=query, max_pages=min(max_pages, MAX_COMPARE_PAGES), timeout=HOSTED_TIMEOUT
+    )
 
 
 @server.tool(description="Fetch a public JSON API endpoint.")

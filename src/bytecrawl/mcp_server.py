@@ -181,11 +181,13 @@ def list_links(url: str, raw: bool = False) -> dict:
         "(level by level). Returns pages ranked by relevance plus crawl stats."
     )
 )
-def focused_crawl(url: str, query: str = "", strategy: str = "shark", max_pages: int = 20) -> dict:
+def focused_crawl(
+    url: str, query: str = "", strategy: str = "shark", max_pages: int = 20, timeout: int = 10
+) -> dict:
     if strategy not in _STRATEGIES:
         raise ValueError(f"strategy must be one of {sorted(_STRATEGIES)}")
     max_pages = min(max_pages, 50)  # keep agent calls bounded and polite
-    crawler = _STRATEGIES[strategy](query=query, delay=DELAY)
+    crawler = _STRATEGIES[strategy](query=query, delay=DELAY, timeout=timeout)
     result = crawler.crawl(url, max_pages=max_pages)
     # A walled, throttled or unreachable seed comes back as an empty crawl; raise
     # it as the same blocked/rate-limited/unreachable error a single fetch would
@@ -212,10 +214,10 @@ def focused_crawl(url: str, query: str = "", strategy: str = "shark", max_pages:
         "the winner."
     )
 )
-def compare_strategies(url: str, query: str, max_pages: int = 20) -> dict:
+def compare_strategies(url: str, query: str, max_pages: int = 20, timeout: int = 10) -> dict:
     max_pages = min(max_pages, 50)  # same bound as focused_crawl, per strategy
     with _seed_errors_as_tool_errors():
-        out = compare(url, query, max_pages=max_pages, delay=DELAY)
+        out = compare(url, query, max_pages=max_pages, delay=DELAY, timeout=timeout)
     return {"url": url, "query": query, "max_pages": max_pages, **out}
 
 
