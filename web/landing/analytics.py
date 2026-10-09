@@ -17,7 +17,12 @@ from posthog import Posthog
 posthog_client = Posthog(
     project_api_key=os.environ.get("POSTHOG_PROJECT_TOKEN", ""),
     host=os.environ.get("POSTHOG_HOST", "https://us.i.posthog.com"),
-    enable_exception_autocapture=True,
+    # Turned off: no background consumer thread, no exception autocapture.
+    # On Fluid the consumer thread kept the instance warm, billing provisioned
+    # memory and Active CPU continuously. With the client disabled, track() and
+    # the per-response flush() become no-ops and the instance can idle.
+    disabled=True,
+    enable_exception_autocapture=False,
 )
 atexit.register(posthog_client.shutdown)
 
