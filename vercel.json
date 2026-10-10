@@ -6,7 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "includeFiles": ["web/landing/templates/**", "web/landing/static/**", "src/bytecrawl/**"],
-        "maxDuration": 10
+        "maxDuration": 60
       }
     },
     {
