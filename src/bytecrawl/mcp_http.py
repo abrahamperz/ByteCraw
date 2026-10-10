@@ -48,7 +48,7 @@ MAX_COMPARE_PAGES = 5
 # is MAX_PAGES * HOSTED_TIMEOUT ~= 40s, inside the 45s maxDuration in
 # vercel.json. This is what keeps crawls from hitting the wall and timing out.
 HOSTED_TIMEOUT = 5
-RATE_LIMIT = 20  # requests per window per client IP
+RATE_LIMIT = 5  # requests per window per client IP (best-effort, per warm instance)
 RATE_WINDOW = 60.0  # seconds
 
 
