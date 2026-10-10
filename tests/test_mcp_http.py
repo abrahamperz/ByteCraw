@@ -77,6 +77,32 @@ class TestSSRFGuard:
         assert called == []
 
 
+class TestErrorTranslation:
+    def test_plain_error_becomes_retryable_toolerror(self, monkeypatch):
+        """A plain exception from the underlying call is otherwise masked as a
+        generic 'error executing tool'; the hosted tools re-raise it as a
+        ToolError with the reason and a retry hint (cold-start friendly)."""
+        from mcp.server.mcpserver.exceptions import ToolError
+
+        def boom(*a, **kw):
+            raise ConnectionError("connection reset")
+
+        monkeypatch.setattr(mcp_http.local, "fetch_markdown", boom)
+        with pytest.raises(ToolError, match="retry"):
+            mcp_http.fetch_markdown("http://8.8.8.8/")
+
+    def test_toolerror_passes_through_unwrapped(self, monkeypatch):
+        """An already-meaningful ToolError (SSRF, seed error) is not rewrapped."""
+        from mcp.server.mcpserver.exceptions import ToolError
+
+        def boom(*a, **kw):
+            raise ToolError("seed is unreachable")
+
+        monkeypatch.setattr(mcp_http.local, "focused_crawl", boom)
+        with pytest.raises(ToolError, match="seed is unreachable"):
+            mcp_http.focused_crawl("http://8.8.8.8/")
+
+
 class TestRateLimiter:
     def test_allows_up_to_limit(self):
         rl = RateLimiter(limit=3, window=60)
