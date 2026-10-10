@@ -61,6 +61,25 @@ def _guarded(url: str) -> None:
         raise ToolError(str(e)) from e
 
 
+def _call(fn, *args, **kwargs):
+    """Run a scrape/crawl call, surfacing failures as a clear, retryable
+    ToolError instead of the framework's generic 'error executing tool' mask.
+
+    A plain exception (a slow/unreachable target, or the server cold-starting
+    after idle) otherwise reaches the client as an opaque error. We re-raise it
+    with the reason and a retry hint; ToolErrors (SSRF, seed errors) pass through
+    untouched."""
+    try:
+        return fn(*args, **kwargs)
+    except ToolError:
+        raise
+    except Exception as e:  # noqa: BLE001 — translate so the client sees why
+        raise ToolError(
+            f"{type(e).__name__}: {e}. If this was the first call after a quiet "
+            "period, the server may have been cold-starting — retry once."
+        ) from e
+
+
 # --- 3. rate limit ----------------------------------------------------------
 class RateLimiter:
     """Sliding-window counter per key. In-memory: per-instance on serverless."""
@@ -122,7 +141,9 @@ server = MCPServer(
         "Hosted ByteCrawl: web scraping and focused crawling. Static HTML only "
         "(no JS rendering here — run bytecrawl-mcp locally for that). "
         f"Crawls are capped at {MAX_PAGES} pages per call, and "
-        f"compare_strategies at {MAX_COMPARE_PAGES} pages per strategy."
+        f"compare_strategies at {MAX_COMPARE_PAGES} pages per strategy. "
+        "The first call after a period of inactivity may be slow or fail once "
+        "while the server cold-starts — just retry it."
     ),
 )
 
@@ -136,7 +157,7 @@ server = MCPServer(
 )
 def fetch_markdown(url: str) -> dict:
     _guarded(url)
-    return local.fetch_markdown(url)
+    return _call(local.fetch_markdown, url)
 
 
 @server.tool(
@@ -154,7 +175,7 @@ def extract(
     url: str, item: str = "", fields: dict[str, str] | None = None, select: str = ""
 ) -> dict:
     _guarded(url)
-    return local.extract(url, item=item, fields=fields, select=select)
+    return _call(local.extract, url, item=item, fields=fields, select=select)
 
 
 @server.tool(
@@ -166,7 +187,7 @@ def extract(
 )
 def list_links(url: str, raw: bool = False) -> dict:
     _guarded(url)
-    return local.list_links(url, raw=raw)
+    return _call(local.list_links, url, raw=raw)
 
 
 @server.tool(
@@ -180,7 +201,8 @@ def focused_crawl(
     url: str, query: str = "", strategy: str = "shark", max_pages: int = MAX_PAGES
 ) -> dict:
     _guarded(url)
-    return local.focused_crawl(
+    return _call(
+        local.focused_crawl,
         url,
         query=query,
         strategy=strategy,
@@ -199,15 +221,19 @@ def focused_crawl(
 )
 def compare_strategies(url: str, query: str, max_pages: int = MAX_COMPARE_PAGES) -> dict:
     _guarded(url)
-    return local.compare_strategies(
-        url, query=query, max_pages=min(max_pages, MAX_COMPARE_PAGES), timeout=HOSTED_TIMEOUT
+    return _call(
+        local.compare_strategies,
+        url,
+        query=query,
+        max_pages=min(max_pages, MAX_COMPARE_PAGES),
+        timeout=HOSTED_TIMEOUT,
     )
 
 
 @server.tool(description="Fetch a public JSON API endpoint.")
 def fetch_json_api(url: str, params: dict | None = None) -> dict:
     _guarded(url)
-    return local.fetch_json_api(url, params=params)
+    return _call(local.fetch_json_api, url, params=params)
 
 
 def _transport_security() -> TransportSecuritySettings:
