@@ -14,7 +14,7 @@
       "use": "@vercel/python",
       "config": {
         "includeFiles": ["src/bytecrawl/**"],
-        "maxDuration": 60
+        "maxDuration": 45
       }
     }
   ],

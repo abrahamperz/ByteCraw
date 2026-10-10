@@ -132,25 +132,29 @@ class TestCaps:
     def test_focused_crawl_clamped(self, monkeypatch):
         seen = {}
 
-        def spy(url, query="", strategy="shark", max_pages=0):
+        def spy(url, query="", strategy="shark", max_pages=0, timeout=0):
             seen["max_pages"] = max_pages
+            seen["timeout"] = timeout
             return {}
 
         monkeypatch.setattr(mcp_http.local, "focused_crawl", spy)
         mcp_http.focused_crawl("http://8.8.8.8/", max_pages=9999)
         assert seen["max_pages"] == mcp_http.MAX_PAGES
+        assert seen["timeout"] == mcp_http.HOSTED_TIMEOUT
 
     def test_compare_strategies_clamped_lower(self, monkeypatch):
         """Three crawls behind one rate-limited request, so a tighter cap."""
         seen = {}
 
-        def spy(url, query="", max_pages=0):
+        def spy(url, query="", max_pages=0, timeout=0):
             seen["max_pages"] = max_pages
+            seen["timeout"] = timeout
             return {}
 
         monkeypatch.setattr(mcp_http.local, "compare_strategies", spy)
         mcp_http.compare_strategies("http://8.8.8.8/", query="x", max_pages=9999)
         assert seen["max_pages"] == mcp_http.MAX_COMPARE_PAGES
+        assert seen["timeout"] == mcp_http.HOSTED_TIMEOUT
         assert mcp_http.MAX_COMPARE_PAGES < mcp_http.MAX_PAGES
 
 
